@@ -1,9 +1,8 @@
 # UniPy
-UniPy is a mobile game engine written entirely in Python. In it, you can create games and applications of any level. This engine is completely open source, so everyone can contribute to this project.
+UniPy is a good game engine to speed up the creation of your programs on a library like pygame. UniPy is multiplatform and works on many platforms: Android (best option is to use IDE: Pydroid 3), Windows, Linux, Mac. UniPy is completely Open Source, so everyone can contribute!
 
-How to run the engine on the phone?
-You need to download the Pydroid 3 app from Google Play and then open the file main.py with the Pydroid explorer and run it.
+The engine has a very user-friendly interface that makes it easy to create programs. In addition, once you create your programs, you can export them and run them outside the engine, and that's not all!
 
-UniPy has not been optimized for PC, so if you run the engine on your computer you might get errors.
-
-Also read the license to use the engine before using it!
+To run the engine, use the file "main.py".
+All documentation about the engine can be found in the "Documentation" folder.
+Before using the engine, be sure to read the file "LICENSE.txt".
