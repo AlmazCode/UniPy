@@ -7,5 +7,5 @@ To run the engine, use the file "main.py".
 All documentation about the engine can be found in the "Documentation" folder.
 Before using the engine, be sure to read the file "LICENSE.txt".
 
-chief tester - SergReminder
-chief programmer - AlmazCode
+## chief tester - SergReminder
+## chief programmer - AlmazCode
