@@ -1,0 +1,118 @@
+UniPy is a tool that can be used by anyone, but for more effective usage and to prevent errors in the 
+code, it is desirable to have basic knowledge of the Python language.
+To start working with objects in your game, you need to import the GetObj function from the UniPy 
+module. To do this, you need to write the following code:
+```
+From UniPy import GetObj
+```
+
+The GetObj function allows you to get a reference to an object by its name. For example, if you want to 
+get a reference to the "player" object, you can use the following code:
+```
+obj = GetObj("player")
+```
+
+Now the variable obj will contain a reference to the "player" object.
+In addition, the UniPy module has two functions that you may need to use: Start and Update.
+The Start function is called once at the start of the program. It can be useful, for example, for object 
+initialization or loading data from files. To define the Start function, simply write it as follows:
+```
+def Start():
+ # Your code here
+```
+
+The Update function is called every frame of the game. It can be useful, for example, for updating object 
+positions or checking collisions. To define the Update function, simply write it as follows:
+```
+def Update():
+ …
+ # Your code here
+```
+
+The UniPy module also has a list called objects, which stores all the game objects. You can access a 
+specific object by using its index in the list. For example, if you want to access the first object in the list, 
+you can use the following code:
+```
+obj = objects[0]
+```
+
+Now the variable obj will contain a reference to the first object in the objects list.
+Here's an example code:
+```
+from UniPy import GetObj
+import random
+
+player = GetObj("player")
+playerSpeed = 5
+
+def Start():
+    player.x = random.randint(0, 200)
+    
+def Update():
+    player.x += playerSpeed
+```
+
+This code demonstrates how to use the UniPy module to work with objects in a game.
+First, we import the GetObj function from the UniPy module. It allows us to access objects in the game 
+using their names.
+After that, we can get a reference to an object in the game using the GetObj function. In this code, we 
+get a reference to the "player" object and store it in the variable player.
+Additionally, to work with objects in the game, you need to know their properties and methods. In this 
+code, we use the playerSpeed variable to determine the movement speed of the "player" object.
+To initialize the initial state of objects in the game, you can use the Start function. It is called once at the 
+start of the program and allows you to set the initial state of objects.
+In this code, the Start function is used to set the initial position of the "player" object on the game field. 
+We use the random.randint function to set a random value for the x-coordinate in the range from 0 to 
+200.
+To update the state of objects in the game every frame, you need to use the Update function. It is called 
+every frame of the game and allows you to change the state of objects.
+In this code, the Update function is used to update the x-coordinate of the "player" object by the value 
+of playerSpeed.
+
+Additional UniPy functions:
+
+[functions to be declared]
+- onFingerDown(finger_id, finger_pos) - called whenever a finger is pressed, and two arguments must be 
+specified.
+- onFingerUp(finger_id, finger_pos) - called whenever a finger is released.
+- onFingerMotion(finger_id, finger_pos) - called whenever a finger is moved.
+- onWindowResized(new_window_size) - called when the window is resized.
+
+[functions that are called]
+- appQuit() - terminates the program.
+- reloadApp() - reloads the program.
+
+- consoleLog(text) - prints the text to the console, useful for program debugging.
+
+- SetCamera(name: str) - sets the camera to the object it will follow (by name).
+
+- distance(obj1, obj2) - will return the XY distance between two objects in pixels.
+
+- GetObjectsWithTag(name: str) - will return a list of objects with the corresponding tag.
+
+- GetModule(name: str) - returns a reference to your script located in the project's root folder.
+- GetTexture(name: str, fullAlpha: bool = False) - will return image by name, if fullAlpha = True then 
+return image with full alpha channels.
+- GetSound(name: str) - will return a sound object by name.
+
+- CloneObject(name: str) - clones an object.
+- DelObj(obj) - deletes an object, you just need to specify which one.
+
+- SetBgColor(color: tuple) - sets the background color of the game window. It takes a tuple with three 
+RGB values (red, green, blue) ranging from 0 to 255 as an argument. For example, to set the background 
+color to bright cyan, you can call the function SetBgColor((0, 200, 255)).
+
+- SaveVariable(keyName, variable, type) - saves the value of a variable to the device. It takes the key (a 
+string value), the variable to be saved, and its type as arguments. (can store these data types: str, int, float, bool, list, tuple, dict)
+For example, to save the value of the 
+"money" variable of type int with the key "moneys", you can call the function SaveVariable("moneys", 
+money, "int").
+
+- LoadVariable(keyName, SERT=0) - retrieves a previously saved value of a variable with the specified key. 
+It takes the key (a string value) as an argument and an optional SERT argument - the type of the returned 
+value in case of an error. By default, SERT is set to 0. If the saved value cannot be loaded, the function 
+will return the value specified in the SERT argument. For example, to load the value of the "money" 
+variable from the saved data with the key "moneys", you can call the function LoadVariable("moneys") 
+and assign the value to the "money" variable. If an error occurs during loading, the function will return 
+the default value (0 unless another argument is specified).
+Important! All these functions are in the UniPy module, so they need to be imported from there.
