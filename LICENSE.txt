@@ -2,16 +2,16 @@ Copyright (c) 2023 AlmazCode
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of the UniPy Game Engine and associated documentation files (the "Software"), to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the following conditions:
 
-1. Commercial use of the UniPy Game Engine, in any form, is strictly prohibited without explicit written permission from the author. Please contact AlmazCode for obtaining the appropriate authorization.
+Commercial use of the UniPy Game Engine, in any form, is strictly prohibited without explicit written permission from the author. Please contact AlmazCode for obtaining the appropriate authorization.
 
-2. The UniPy Game Engine is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the UniPy Game Engine or the use or other dealings in the Software.
+The UniPy Game Engine is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the UniPy Game Engine or the use or other dealings in the Software.
 
-3. You are granted full rights to modify, adapt, embed, or alter the UniPy Game Engine to suit your needs. The author shall not be held responsible for any consequences, issues, or damages arising from such modifications, including the potential for introducing viruses or any other undesired outcomes.
+You are granted full rights to modify, adapt, embed, or alter the UniPy Game Engine to suit your needs. The author shall not be held responsible for any consequences, issues, or damages arising from such modifications, including the potential for introducing viruses or any other undesired outcomes.
 
-4. All copies or substantial portions of the UniPy Game Engine must include the following copyright notice and the terms of this license:
+All copies or substantial portions of the UniPy Game Engine must include the following copyright notice and the terms of this license:
 
    Copyright (c) 2023 AlmazCode
    
    This software, including the UniPy Game Engine, is provided under the terms of the UniPy Game Engine License.
 
-5. Any distribution or sublicensing of the UniPy Game Engine must comply with the terms of this license and explicitly reference the copyright notice.
+Any distribution or sublicensing of the UniPy Game Engine must comply with the terms of this license and explicitly reference the copyright notice.
