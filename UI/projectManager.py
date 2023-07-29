@@ -114,5 +114,5 @@ class ProjectManager:
 
                 y += self.elem_height + 10
 
-            self.lastY = y - self.elem_height - 20
+            if len(self.elements) > 0: self.lastY = y - self.elem_height - 20
             self.win.blit(self.surface, (self.x, self.y))

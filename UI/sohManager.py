@@ -104,5 +104,5 @@ class SOHManager:
                    txPos = tx.get_rect(center=(0, y + self.elem_height // 2))
                    self.surface.blit(tx, (20, txPos[1] + self.oY))
                y += self.elem_height + 10
-            self.lastY = y - self.elem_height - 20
+            if len(self.elements) > 0: self.lastY = y - self.elem_height - 20
             self.win.blit(self.surface, (self.x, self.y))

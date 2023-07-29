@@ -286,7 +286,7 @@ class Conductor:
                 
         y = 10
         for idx, i in enumerate(f.split("\n")):
-            line = font.render(str(idx), 0, lineColor)
+            line = font.render(str(idx+1), 0, lineColor)
             self.viewTextLineImage.append(line)
             self.viewTextImagePos.append((self.MLS + 25, y))
             y += size + 2
@@ -400,5 +400,5 @@ class Conductor:
 	                
 	                y += self.elemHeight + 10
 
-            self.lastY = y - self.elemHeight - 20
+            if len(self.elements) > 0: self.lastY = y - self.elemHeight - 20
             self.win.blit(self.surface, (self.x, self.y))

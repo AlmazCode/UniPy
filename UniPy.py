@@ -117,6 +117,7 @@ def CloneObject(name):
             
             if hasattr(i, "Start"): i.Start()
             if hasattr(i, "Update"): st.MHFU.append(i)
+        return objects[-1]
     
     else:
         caller_frame = inspect.currentframe().f_back

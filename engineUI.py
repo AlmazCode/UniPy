@@ -367,7 +367,7 @@ def startCRfromPAC():
     fileConductor.content = ""
     fileConductor.func = AddFileToPAC
     fileConductor.startPath = f"{pt.s}storage{pt.s}emulated{pt.s}0"
-    fileConductor.setPath()
+    fileConductor.setPath(fileConductor.thisPath)
     
 def startCRfromMoveFile():
     st.drawingLayer = 2
@@ -992,36 +992,38 @@ def setScriptVarValue(script, type, var, value, LIST = None, OBJ = None, cr = Fa
     obj = pe.objects[idx]
     
     try:
-                
         if type == "OBJ":
             _val = value
             value = f"pe.GetObj('{value}')"
-            
+                
         elif type == "PATH":
             _val = value
             if value in [i.split(".")[0] for i in pe.audios]: value = f"pe.GetSound('{value}')"
             elif value in [i.split(".")[0] for i in pe.textures]: value = f"pe.GetTexture('{value}')"
             else: a = a
-            
+                
         elif type == "NoneType":
             _val = str(eval(value))
             value = eval(value)
         
+        elif type == "str":
+            _val = value
+            
         else:
                 value = eval(f"{type}({value})")
                 _val = str(value)
-                
+                    
         mn = [i.__name__.split(".")[-1] for i in st.modules]
         if eval(f"st.modules[mn.index(\"{script}\")].{script}().{var}") == value: obj.SC_CHANGED[script][var] = False
         else: obj.SC_CHANGED[script][var] = True
-                
+                    
         obj.S_CONTENT[script][var][0] = value
-        
+            
         OBJ.text = _val 
-                
+                    
         ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
     except:
-        OBJ.setOldText()
+        OBJ.set_old_text()
 
 # load object property
 def setObjProperty(text, resetOPII = True):
