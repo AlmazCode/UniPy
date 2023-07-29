@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, traceback
 import UniPy as pe
 import settings as st
 import engineUI as eui
@@ -319,6 +319,7 @@ class Object:
         if name in md:
             return self.S_LINKS[md.index(name)]
         else:
+            eui.error = True
             eui._console.Log(f"UniPy Error: in getting module: \"{name}\" is not defined", "warning")
     
     def HasPressed(self, pos, id):
@@ -484,9 +485,16 @@ class Object:
     	     for obj in pe.objects:
     	     	if obj != self and hasattr(obj, "bodyType") and self.rect.colliderect(obj.rect) and obj.bodyType != "None":
     	     		if obj == self.collidedObj: ico = True
+    	     		lastObj = self.collidedObj
     	     		self.collidedObj = obj
-    	     		if self.onCollided != None and self.collidedObj != obj:
-    	     		    eval(f"self.onCollided{self.onCollidedContent}")
+    	     		if self.onCollided != None and lastObj != obj:
+    	     		    try: eval(f"self.onCollided{self.onCollidedContent}")
+    	     		    except:
+    	     		        eui.error = True
+    	     		        tb = e.__traceback__
+    	     		        filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+    	     		        eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+    	     		        
     	     		c += 1
     	     		dx = min(abs(self.rect.right - obj.rect.left), abs(self.rect.left - obj.rect.right))
     	     		dy = min(abs(self.rect.bottom - obj.rect.top - 8), abs(self.rect.top - obj.rect.bottom - 8))
@@ -527,7 +535,12 @@ class Object:
     	         if not self.rect.colliderect(pygame.Rect(self.collidedObj.rect.x - 2, self.collidedObj.rect.y - 2, self.collidedObj.rect.width + 4, self.collidedObj.rect.height + 4)):
     	             self.collidedObj = None
     	             if self.onUnCollided != None:
-    	                 eval(f"self.onUnCollided{self.onUnCollidedContent}")
+    	                 try: eval(f"self.onUnCollided{self.onUnCollidedContent}")
+    	                 except:
+    	                     eui.error = True
+    	                     tb = e.__traceback__
+    	                     filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+    	                     eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
         
         self.lastTop = self.rect.top
         self.lastPos = self.rect.topleft

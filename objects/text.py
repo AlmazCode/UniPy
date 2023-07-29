@@ -334,6 +334,7 @@ class Text:
             return self.S_LINKS[md.index(name)]
         else:
             eui._console.Log(f"UniPy Error: in getting module: \"{name}\" is not defined", "warning")
+            eui.error = True
     
     def setPosObject(self):
         wfc = self.textes[0].get_width()
