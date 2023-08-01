@@ -192,10 +192,10 @@ class Conductor:
                         break
     
     def Back(self):
-        if self.viewText: self.viewText = False
+        self.viewText = False
         if self.thisPath != self.startPath:
-            get = self.thisPath.split("/")
-            self.thisPath = "/".join(get[0:-1])
+            get = self.thisPath.split(pt.s)
+            self.thisPath = f"{pt.s}".join(get[0:-1])
             self.elem_idx = -1
             self.oY = 0
             self.lastY = -1

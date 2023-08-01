@@ -19,9 +19,26 @@ textures = {}
 texturesTSP = {}
 audios = {}
 
-_varTypes = ["str", "int", "float", "bool", "list", "tuple", "dict"]
-_audioTypes = [".mp3", ".ogg", ".wav", ".flac"]
-_imgTypes = [".png", ".jpg", ".jpeg"]
+_varTypes = [
+                "str",
+                "int",
+                "float",
+                "bool",
+                "list",
+                "tuple",
+                "dict"
+                    ]
+_audioTypes = [
+                    ".mp3",
+                    ".ogg",
+                    ".wav",
+                    ".flac"
+                        ]
+_imgTypes = [
+                ".png",
+                ".jpg",
+                ".jpeg"
+                    ]
 
 class OBJ:
     def __init__(self):
@@ -163,18 +180,17 @@ def SetCamera(name: str):
 def DelObj(obj):
     global objects, OWS, objLayers
     
-    if st.AppStarted:
-        if obj in objects:
-            for script in obj.S_LINKS:
-                OWS.remove(script)
-                if script in st.MHFU: st.MHFU.remove(script)
-            if obj.PARENT in objName: objName.remove(obj.PARENT)
-            objects.remove(obj)
-        else:
-            caller_frame = inspect.currentframe().f_back
-            file = caller_frame.f_code.co_filename
-            line = caller_frame.f_lineno
-            Error(file, line, f"\"{obj}\" is not defined", "warning")
+    if obj in objects:
+        for script in obj.S_LINKS:
+            OWS.remove(script)
+            if script in st.MHFU: st.MHFU.remove(script)
+        if obj.PARENT in objName: objName.remove(obj.PARENT)
+        objects.remove(obj)
+    else:
+        caller_frame = inspect.currentframe().f_back
+        file = caller_frame.f_code.co_filename
+        line = caller_frame.f_lineno
+        Error(file, line, f"\"{obj}\" is not defined", "warning")
 
 def distance(obj1, obj2):
     caller_frame = inspect.currentframe().f_back

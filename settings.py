@@ -45,7 +45,7 @@ modules = []
 projects = []
 files = []
 projectIdx = 0
-projectSize = (0,0)
+projectSize = (0, 0)
 MHFU = []
 
 # game settings
@@ -105,9 +105,11 @@ uiWIBR = 15  # Widgets inputs, toggle buttons border radius
 uiWPEOEEBR = 15  # Widgets project elements, object hierarchy elements border radius
 uiPBBR = 15  # Progress bar border radius
 uiMBR = 15  # Messages border radius
+uiSOHBGBR = 15 # UI selection object hierarchy bg border radius
 uiMFS = 0  # Messages fill size
 uiPMFS = 0  # Project manager fill size
 uiSOHFL = 0  # UI selection object hierarchy fill size
+uiSOHBGFL = 0 # UI selection object hierarchy bg fill size
 uiISIOI = 196  # Image size in the object inspector
 uiFont = f"fonts{pt.s}calibri.ttf" # Engine UI font path
 uiTFont = pygame.font.Font(uiFont, height // 20  if height > 720 else height // 10) # Engine UI font size (big)

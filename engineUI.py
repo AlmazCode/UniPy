@@ -73,32 +73,28 @@ def toCP():
     pe.objName = []
     pe.objClass = []
 
+def loadProjectInfoData(path):
+    if not os.path.exists(f"{path}{pt.s}project_info.txt"):
+        with open(f"{path}{pt.s}project_info.txt", "w") as f:
+            f.write(f"{st.AppWidth} {st.AppHeight}, 0.1")
+    
+    inf = open(f"{path}{pt.s}project_info.txt", "r").read().split(",")
+    size = inf[0].split(" ")
+    vr = inf[1].strip() if len(inf) > 1 else "0.1"
+    return (int(size[0]), int(size[1])), vr
+
 # open project
 def openProject(idx):
     global selectionObjects
     
     st.projectIdx = idx
-    st.modules = []
-    loadModules(True)
     
     st.projects = os.listdir(PATH)
-    sys.path.insert(0, f"{PATH}{pt.s}{st.projects[idx]}")
-    
-    # load project_info file
-    try:
-        getInf = open(f"{PATH}{pt.s}{st.projects[idx]}{pt.s}project_info.txt", "r").read()
-    except:
-        # else create new
-        with open(f"{PATH}{pt.s}{st.projects[idx]}{pt.s}project_info.txt", "w") as f:
-            f.write(f"{st.AppWidth} {st.AppHeight}, 0.1")
-    
-    # read project_info file
-    getInf = open(f"{PATH}{pt.s}{st.projects[idx]}{pt.s}project_info.txt", "r").read()
-    inf = getInf.split(",")
-    size = inf[0].split(" ")
+    st.files, st.dirs = loadAllFilesFromDir(f"{PATH}{pt.s}{st.projects[st.projectIdx]}")
+    PB.start(PB.title, len(st.files))
     
     # set project size
-    st.projectSize = (int(size[0]), int(size[1]))
+    st.projectSize = loadProjectInfoData(f"{PATH}{pt.s}{st.projects[idx]}")[0]
     pe.pWidth, pe.pHeight = st.projectSize
     
     # load all files from project
@@ -142,17 +138,14 @@ def openProject(idx):
     
     # load game objects
     ouar.loadObjs(pe, f"{PATH}{pt.s}{st.projects[idx]}{pt.s}ObjectInfo.txt")
-    loadObjectScriptLinks()
     
     st.drawingLayer = 0
     PAC.startPath = f".{pt.s}projects{pt.s}{st.projects[idx]}"
     PAC.setPath()
     
     SOHM.elements = []
-    SOHM.elem_name = []
     for i in pe.objName:
         SOHM.elements.append(i)
-        SOHM.elem_name.append(i)
     SOHM.normalize()
 
 # functions
@@ -252,8 +245,6 @@ def loadModules(fpm = False):
         except: pass
     st.modules = []
     
-    st.files, st.dirs = loadAllFilesFromDir(f"{PATH}{pt.s}{st.projects[st.projectIdx]}")
-    if fpm: PB.start(PB.title, len(st.files))
     for file in st.files:
         if file[-3:] == ".py":
             if fpm:
@@ -286,9 +277,8 @@ def copyProject():
     PM.normalize()
 
 def OpenMenuToExportProject():
-    vr = open(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}{pt.s}project_info.txt", "r").read()
-    vr = vr.split(",")[1] if len(vr.split(",")) > 1 else "0.1"
-    InputSetExportProjectVersion.text = vr.strip()
+    vr = loadProjectInfoData(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")[1]
+    InputSetExportProjectVersion.text = vr
     InputSetExportProjectVersion.check_text()
     st.drawingLayer = 4
 
@@ -296,18 +286,9 @@ def CloseMenuToExportProject():
     st.drawingLayer = -1
 
 def ExportProject():
-    if os.path.exists(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}{pt.s}project_info.txt"):
-        getInf = open(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}{pt.s}project_info.txt", "r").read()
-        inf = getInf.split(",")
-        size = inf[0].split(" ")
-        size = (int(size[0]), int(size[1]))
-        vr = inf[1].strip() if len(inf) > 1 else "0.1"
-    else:
-        size = winApp.get_size()
-        vr = "0.1"
-    
+    size, vr = loadProjectInfoData(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")
     build.createProject(st.exportProjectPath, f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}", PM.elements[PM.elem_idx], PM.elements[PM.elem_idx], size, vr)
-    createMessage(st.win, f'The project was successfully exported to PATH:\n"{st.exportProjectPath}"', stopTime = 120)
+    createMessage(st.win, f'The project was successfully exported to path:\n"{st.exportProjectPath}"', stopTime = 120)
 
 # delete project
 def deleteFolderInPM():
@@ -347,11 +328,9 @@ def deleteObj():
     ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
     
     SOHM.elements = []
-    SOHM.elem_name = []
     SOHM.elem_idx = -1
     for i in pe.objName:
         SOHM.elements.append(i)
-        SOHM.elem_name.append(i)
     SOHM.normalize()
 
 # back path in conductor
@@ -462,7 +441,8 @@ def startPACR():
     btDoneCR.render = False
     
 # close conductor
-def closeCR(): st.drawingLayer = 0
+def closeCR():
+    st.drawingLayer = 0
 
 # rename file in project assets conductor
 def startRenameFilePAC():
@@ -516,8 +496,9 @@ def endRenameFilePAC():
     st.lastPressedInput = None
 
 def renameExportProjectVersion():
+    size = loadProjectInfoData(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")[0]
     with open(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}{pt.s}project_info.txt", "w") as f:
-            f.write(f"{st.projectSize[0]} {st.projectSize[1]}, {InputSetExportProjectVersion.text}")
+            f.write(f"{size[0]} {size[1]}, {InputSetExportProjectVersion.text.strip()}")
 
 # includes a widget for selecting items in object inspector
 def startSelectorForObjectInspector(elems, button, key):
@@ -588,7 +569,6 @@ def objectUp():
     idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
     
     if idx > 0:
-        SOHM.elem_name[idx], SOHM.elem_name[idx-1] = SOHM.elem_name[idx-1], SOHM.elem_name[idx]
         SOHM.elements[idx], SOHM.elements[idx-1] = SOHM.elements[idx-1], SOHM.elements[idx]
         pe.objName[idx], pe.objName[idx-1] = pe.objName[idx-1], pe.objName[idx]
         pe.objects[idx], pe.objects[idx-1] = pe.objects[idx-1], pe.objects[idx]
@@ -601,7 +581,6 @@ def objectDown():
     idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
     
     if idx != len(SOHM.elements)-1:
-        SOHM.elem_name[idx], SOHM.elem_name[idx+1] = SOHM.elem_name[idx+1], SOHM.elem_name[idx]
         SOHM.elements[idx], SOHM.elements[idx+1] = SOHM.elements[idx+1], SOHM.elements[idx]
         pe.objName[idx], pe.objName[idx+1] = pe.objName[idx+1], pe.objName[idx]
         pe.objects[idx], pe.objects[idx+1] = pe.objects[idx+1], pe.objects[idx]
@@ -617,7 +596,6 @@ def copyObject():
     pe.objName.append(f"{pe.objName[idx]} (1)")
     pe.objClass.append(pe.objClass[idx])
     SOHM.elements.append(f"{pe.objName[idx]} (1)")
-    SOHM.elem_name.append(f"{pe.objName[idx]} (1)")
     SOHM.elem_idx = len(pe.objects)-1
     SOHM.normalize()
     
@@ -707,7 +685,6 @@ def loadOBJScriptLinks(idx):
 def startApp():
     global error
     
-    st.AppStarted = True
     pe.objects = []
     pe.objClass = []
     pe.objName = []
@@ -759,7 +736,6 @@ def returnToEditor():
     
     pygame.mixer.stop()
     
-    st.AppStarted = False
     pe.objects = []
     pe.objClass = []
     pe.objName = []
@@ -773,7 +749,6 @@ def returnToEditor():
     btStartApp.adjust_dimensions_and_positions()
     
     ouar.loadObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
-    loadObjectScriptLinks()
 
 # show objects that can be created
 def SOTCBC():
@@ -821,7 +796,6 @@ def changeObjProperty(key, content = None):
     
     if key == "name":
         SOHM.elements[SOHM.last_elem] = ObjName.text
-        SOHM.elem_name[SOHM.last_elem] = ObjName.text
         SOHM.normalize()
         pe.objName[idx] = ObjName.text
         st.lastSelectionObject = ObjName.text
@@ -1288,10 +1262,10 @@ PM = projectManager.ProjectManager(st.win, "eui.openProject", elements = st.proj
 IFRPIPM = input.Input(st.win, endRenameProject, noText = "Name...", maxChars = 256, width = PM.elem_width, height = PM.elem_height, fontSize = 40, fontPath = st.uiFont, color = PM.elem_color, pressedColor = st.uiIPC, x = PM.x, ATL = False, borderRadius = st.uiWPEOEEBR, textColor = st.uiITC)
 
 # selection object hierarchy
-SOHM = sohManager.SOHManager(st.win, setObjProperty, fontPath = st.uiFont, y = 10, x = 10, borderRadius = st.uiWPEOEEBR, color = st.uiSOHC, elemColor = st.uiSOHEC, width = st.width // 1.3, height = st.height - 20, content = "(self.elements[self.elem_idx])", elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed)
+SOHM = sohManager.SOHManager(st.win, setObjProperty, fontPath = st.uiFont, y = 10, x = 10, borderRadius = st.uiWPEOEEBR, color = st.uiSOHC, elemColor = st.uiSOHEC, width = st.width // 1.3, height = st.height - 20, content = "(self.elements[self.elem_idx])", elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL)
 
 # selection new object panel
-SNOP = sohManager.SOHManager(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - st.height // 2 - 10, x = btShowPanel.rect.right - st.width // 1.5, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 1.5, height = st.height // 2, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], maxD = 5, minD = 3.5, elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed)
+SNOP = sohManager.SOHManager(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - st.height // 2 - 10, x = btShowPanel.rect.right - st.width // 1.5, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 1.5, height = st.height // 2, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], maxD = 5, minD = 3.5, elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL)
 
 # engine console
 _console = console.Console(st.win, height = st.AppHeight // 2, width = st.AppWidth, font = st.uiFont, y = st.AppHeight - st.AppHeight // 2, bgColor = st.uiCBC, logImg = uiEngineImages["message"], errorImg = uiEngineImages["error"], warningImg = uiEngineImages["warning"], scrollSpeed = st.scrollSpeed)

@@ -16,7 +16,9 @@ class SOHManager:
         self.font_path = args.get("fontPath", None)
         self.render = args.get("render", True)
         self.border_radius = args.get("borderRadius", -1)
+        self.bg_border_radius = args.get("bgBorderRadius", -1)
         self.fill_size = args.get("fillSize", 0)
+        self.bg_fill_size = args.get("bgFillSize", 0)
         self.win = win
         self.func = func
         self.content = args.get("content", "()")
@@ -34,6 +36,7 @@ class SOHManager:
         self.elem_name = self.elements[:]
         self.elem_width = self.surface.get_width() // 1.5
         self.elem_height = int(self.surface.get_height() // self.maxD if self.win.get_width() <= self.win.get_height() else self.surface.get_height() // self.minD)
+        self.surface.set_colorkey((1, 1, 1))
         self.font_size = self.elem_height // 3
         self.font = pygame.font.Font(self.font_path, self.font_size)
         for idx, i in enumerate(self.elem_name):
@@ -50,17 +53,19 @@ class SOHManager:
         self.ce = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
         self.cpe = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
         
-        for elem in self.ce:
+        self.bgSurf = pygame.Surface(self.surface.get_size())
+        self.bgSurf.fill((1, 1, 1))
+        self.bgSurf.set_colorkey((1, 1, 1))
+        pygame.draw.rect(self.bgSurf, self.color, (0, 0, *self.surface.get_size()), self.bg_fill_size, self.bg_border_radius)
+        
+        for elem, pelem in zip(self.ce, self.cpe):
             elem.fill((1, 1, 1))
             elem.set_colorkey((1, 1, 1))
+            pelem.fill((1, 1, 1))
+            pelem.set_colorkey((1, 1, 1))
             
             pygame.draw.rect(elem, self.elem_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
-        
-        for elem in self.cpe:
-            elem.fill((1, 1, 1))
-            elem.set_colorkey((1, 1, 1))
-            
-            pygame.draw.rect(elem, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
+            pygame.draw.rect(pelem, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
     
     def press(self, mPos):
         y = 10
@@ -94,7 +99,8 @@ class SOHManager:
                         self.oY = -self.lastY
                 self.lastMousePos = MP
             
-            self.surface.fill(self.color)
+            self.surface.fill((1, 1, 1))
+            self.surface.blit(self.bgSurf, (0, 0))
             y = 10
             for idx, i in enumerate(self.elements):
                rect = pygame.Rect(10, y + self.oY, self.elem_width, self.elem_height)

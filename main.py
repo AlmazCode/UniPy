@@ -82,11 +82,15 @@ while 1:
             st.uiTSFont = pygame.font.Font(st.uiFont, st.height // 30 if st.height > 720 else st.height // 15)
             eui.PAC.surface = pygame.Surface((st.width, st.height))
             eui.PAC.ADP()
-            eui.PAC.setPath(eui.PAC.thisPath)
+            eui.PAC.ADPIMG()
+            eui.PAC.nrm()
+            eui.PAC.compileText()
             eui.PAC.y = 20 + st.uiBS
             eui.fileConductor.surface = pygame.Surface((st.width, st.height))
             eui.fileConductor.ADP()
-            eui.fileConductor.setPath(eui.fileConductor.thisPath)
+            eui.fileConductor.ADPIMG()
+            eui.fileConductor.nrm()
+            eui.fileConductor.compileText()
             eui.fileConductor.y = 20 + st.uiBS
             eui.SOHM.surface = pygame.Surface((st.width // 1.3, st.height - 20))
             eui.SOHM.normalize()
@@ -348,13 +352,68 @@ while 1:
         
         elif event.type == pygame.TEXTINPUT:
             if st.lastPressedInput != None: st.lastPressedInput.press(event.text)
+            
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyPressed"): script.onKeyPressed(event.text)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyPressed"): script.onKeyPressed(event.text)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
                             
+        elif event.type == pygame.KEYDOWN:
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+                    
         elif event.type == pygame.KEYUP:
-        	key = ""
-        	if event.key == pygame.K_BACKSPACE: key = "BS"
-        	elif event.key == pygame.K_RETURN: key = "ETR"
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                except Exception as e:
+                    eui.error = True
+                    tb = e.__traceback__
+                    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                    eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
         	
-        	if st.lastPressedInput != None: st.lastPressedInput.press(key)
+            key = ""
+            if event.key == pygame.K_BACKSPACE: key = "BS"
+            elif event.key == pygame.K_RETURN: key = "ETR"
+            
+            if st.lastPressedInput != None: st.lastPressedInput.press(key)
     
     if st.lastSelectionObject != None and st.drawingLayer == 0 and st.MBP:
         if scrollPos:

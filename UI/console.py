@@ -45,7 +45,7 @@ class Console:
                 self.textes.append(str(text))
             self.textes_type.append(_type)
             
-        if len(self.textes) > 100:
+        if len(self.textes) > 50:
             self.textes.pop(0)
             self.textes_type.pop(0)
 
