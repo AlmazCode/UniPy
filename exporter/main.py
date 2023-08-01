@@ -44,6 +44,39 @@ while 1:
                     if hasattr(script, "onWindowResized"): script.onWindowResized(event.size)
                 except Exception as e: ...
         
+        elif event.type == pygame.KEYDOWN:
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                except Exception as e: ...
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                except Exception as e: ...
+        
+        elif event.type == pygame.KEYUP:
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                except Exception as e: ...
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                except Exception as e: ...
+        
+        elif event.type == pygame.TEXTINPUT:
+            for script in st.modules:
+                try:
+                    if hasattr(script, "onKeyPressed"): script.onKeyPressed(event.text)
+                except Exception as e: ...
+            
+            for script in pe.OWS:
+                try:
+                    if hasattr(script, "onKeyPressed"): script.onKeyPressed(event.text)
+                except Exception as e: ...
+        
         elif event.type == pygame.MOUSEBUTTONDOWN:
             st.MBP = pygame.mouse.get_pressed()[0]
             if pt._platform != "Android":

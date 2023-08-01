@@ -156,7 +156,7 @@ def createProject(create_path, path_to_project, project_name, program_name, prog
     inf = inf.replace("def appQuit(): eui.returnToEditor()", "def appQuit(): eui.exit()", 1)
     inf = replaceator("def Error(file, line, error, _type):", inf, 3, False, "...")
     inf = inf.replace('.{pt.s}projects{pt.s}{st.projects[st.projectIdx]}', 'res')
-    inf = inf.replace("{eui.path}{pt.s}{st.projects[st.projectIdx]}", "res")
+    inf = inf.replace("{eui.PATH}{pt.s}{st.projects[st.projectIdx]}", "res")
     inf = inf.replace('eui._console.Log(text, "log", file.split("{pt.s}")[-1], line)', "")
     upf.close()
     upf = open(f"{create_path}{pt.s}{project_name}{pt.s}engine{pt.s}UniPy.py", "w")

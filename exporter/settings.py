@@ -12,7 +12,6 @@ pygame.display.set_caption("{AppName}")
 AppWidth, AppHeight = winApp.get_size()
 fps = 60
 WR = pygame.Rect(0, 0, AppWidth, AppHeight)
-AppStarted = True
 MBP = None
 
 projectSize = (0, 0)
