@@ -1,7 +1,9 @@
 import UniPy as up
 
 spawnSpeed = 90
+particleSpawnSpeed = 15
 tick = 0
+tick2 = 0
 moveSpeed = 5
 end = False
 score = 0
@@ -32,7 +34,7 @@ def onPlayerCollided():
         up.GetObj("loseText2").render = True
 
 def onLogDeleted():
-    global score, bestScore, moveSpeed
+    global score, bestScore, moveSpeed, spawnSpeed
     
     score += 1
     if score > bestScore:
@@ -46,19 +48,28 @@ def onLogDeleted():
         moveSpeed = int(moveSpeed * 1.2)
         for obj in up.GetObjectsWithTag("log"):
             obj.GetModule("logController")._speed = moveSpeed
+        for obj in up.GetObjectsWithTag("particle"):
+            obj.GetModule("particleController")._speed = moveSpeed
+    
+    if score % 20 == 0 and spawnSpeed > 20:
+        spawnSpeed -= 10
 
 def onFingerDown(_id, pos):
     if end: up.reloadApp()
 
 def Update():
-    global tick
+    global tick, tick2
     
     if not end:
         
         tick += 1
+        tick2 += 1
         if tick == spawnSpeed:
             up.CloneObject("log")
             tick = 0
+        if tick2 == particleSpawnSpeed:
+            up.CloneObject("particle")
+            tick2 = 0
         
         if lt.pressed():
             player.x -= moveSpeed

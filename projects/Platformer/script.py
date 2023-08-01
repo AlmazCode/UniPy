@@ -91,11 +91,9 @@ def Start():
     
     controller = up.GetObj("landscape_controller").GetModule("landscape_controller")
 
-    seed = random.randint(-999999, 999999)  # Замените на желаемый сид
-        
+    seed = random.randint(-999999, 999999)
     init_p(seed)
-    
-    generate_chunk(0, 0, seed)  # Генерация первого чанка с начальными координатами (0, 0)
+    generate_chunk(0, 0, seed)
     
 def jump():
     if player.bottomCollided:
