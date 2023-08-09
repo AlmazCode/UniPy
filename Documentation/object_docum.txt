@@ -1,88 +1,68 @@
-An object in UniPy is an entity that can be placed on the game scene and interact with other objects in the environment. To facilitate working with objects in the editor, components have been created that can be edited.
+An object in UniPy is a fundamental element that can be placed within the game scene and interact with other objects. To streamline object manipulation in the editor, several editable components have been introduced.
 
-The list of object components that can be edited in the editor includes the following parameters:
+The following are the object components that can be modified in the editor:
 
-    x: the coordinate on the X-axis that defines the position of the object on the game scene.
-    y: the coordinate on the Y-axis that defines the position of the object on the game scene.
-    
-    width: the width of the object.
-    height: the height of the object.
-    
-    angle: the angle at which the object is displayed on the screen.
-    
-    bodyType: the type of body for the object: None - regular object, dynamic - physics body, static - static body, such as a wall.
-    
-    transparent: the transparency of the object.
-    
-    render: if the value of this parameter is False, the object will not be displayed on the screen.
-    
-    flipX: if the value of this parameter is True, the object will be horizontally flipped.
-    
-    flipY: if the value of this parameter is True, the object will be vertically flipped.
-    
-    image: the image to be displayed on the object.
-    
-    cx: object centering along the X-axis in specific positions: right - center from the right side of the screen, left - center from the left side, center - center from the screen center, objX(ObjectName) - center from the X-axis position of another object, objCX(objectName) - center from the central X-axis position of another object.
-    
-    cy: object centering along the Y-axis in specific positions: top - center from the top of the screen, bottom - center from the bottom, center - center from the screen center, objY(ObjectName) - center from the Y-axis position of another object, objCY(objectName) - center from the central Y-axis position of another object.
-    
-    useFullAlpha: if the value of this parameter is True, the object image will use the full alpha channels.
-    
-    script - stores scripts that will manage the object, specify scripts separated by commas
-    
-    color: the color of the object.
-    
-    layer: the layer on which the object will be drawn.
-    
-    tag: object tag. will be useful for filtering or searching for objects in the code.
-    
-    useCamera: if True, but the object will be displayed from the camera.
-    
-It's worth noting that if your object has a dynamic body type, it is better to modify its position using rect.x and rect.y in the code, rather than x and y, to ensure proper physics handling. [This applies only to code]
+- `x`: X-axis coordinate determining the object's position on the game scene.
+- `y`: Y-axis coordinate determining the object's position on the game scene.
+- `width`: Width of the object.
+- `height`: Height of the object.
+- `angle`: Angle at which the object is displayed on the screen.
+- `bodyType`: Type of body for the object: None (regular object), dynamic (physics body), static (static body, e.g., wall).
+- `transparent`: Transparency level of the object.
+- `render`: If False, the object won't be displayed on the screen.
+- `flipX`: If True, the object will be horizontally flipped.
+- `flipY`: If True, the object will be vertically flipped.
+- `image`: Image to be displayed on the object.
+- `cx`: Centering along the X-axis in specific positions: right, left, center, objX(ObjectName), objCX(objectName).
+- `cy`: Centering along the Y-axis in specific positions: top, bottom, center, objY(ObjectName), objCY(objectName).
+- `useFullAlpha`: If True, the object image will use full alpha channels.
+- `script`: Stores scripts managing the object (comma-separated).
+- `color`: Color of the object.
+- `layer`: Drawing layer for the object.
+- `tag`: Object tag for filtering or searching.
+- `useCamera`: If True, the object will be displayed from the camera.
+
+For objects with a dynamic body type, use `rect.x` and `rect.y` for position modifications in code, rather than `x` and `y`, to ensure proper physics handling. (This applies only to code)
 
 Example:
-```
+
+```python
 def Update():
     player.rect.x += 1
 ```
 
-Also, the object will only be centered at startup! To re-center the object based on its parameters, you will need to call a function in the code. There are two functions available: setPos: right, left, top, bottom, centerx, centery, and setPosObject: objX, objY.
+Remember, object centering only occurs at startup. To re-center based on parameters, call functions in the code: `setPos` (right, left, top, bottom, centerx, centery) and `setPosObject` (objX, objY).
 
-UniPy also provides various events for objects, such as object press and object release. These events can be handled using the corresponding functions.
+UniPy provides events for objects, like object press and release. These events can be handled with corresponding functions.
 
-The onPressed function is called when the object is pressed. Arguments can be specified for this function in the pressedContent property of the object.
+- `onPressed`: Called when object is pressed, arguments in `pressedContent`.
+- `onUnPressed`: Called when object is released, arguments in `UnPressedContent`.
 
-The onUnPressed function is called when the object is released. Arguments can be specified for this function in the UnPressedContent property of the object.
+Example:
 
-For example, to resize an object when it is pressed and released, you can use the following code:
-
-```
+```python
 def resize(amount):
     player.width += amount
     player.height += amount
 
 player.onPressed = resize
-player.onPressedContent = "(10)"
+player.onPressedContent = (10)
 player.onUnPressed = resize
-player.onUnPressedContent = "(-10)"
+player.onUnPressedContent = (-10)
 ```
 
-The resize function takes one argument, which is the number of pixels by which the object should be resized. When the object is pressed, the resize function is called with an argument of 10, which increases the size of the object by 10 pixels. When the object is released, the resize function is called with an argument of -10, which restores the object to its original size.
+Use `pressed()` to check if the object was pressed in the current frame. For instance:
 
-There is also a method called pressed, which returns True if the object was pressed by the user in the current frame. This method can be used in conditional statements to perform certain actions when the object is pressed. For example, you can change the position of the object by incrementing its X-coordinate by 1, as shown in the following code:
-
-```
+```python
 def Update():
     if player.pressed():
         player.x += 1
 ```
 
-Understanding the pressed() method allows for efficient control of object behavior in the game and the creation of interactive elements in the user interface.
+This method enables efficient object control and interactive UI elements.
 
-The object also has `onCollided`, `onUnCollided` work like `onPressed` and `onUnPressed`.
+The object has `onCollided` and `onUnCollided` functions, similar to `onPressed` and `onUnPressed`.
 
-The object also has variables `leftCollided`, `rightCollided`, `topCollided`, `bottomCollided`. They store a boolean value whether the object has been confronted by this side with someone.
+Also, `leftCollided`, `rightCollided`, `topCollided`, and `bottomCollided` variables store collision information. `collidedObject` stores the object involved in the collision.
 
-And the `collidedObject` variable stores the object with which the object collided.
-
-Having knowledge of these parameters allows for efficient object control in the engine and customization of its behavior in the game. You can set the parameters manually through code or use the capabilities of the editor, which simplifies the process of creating game objects and speeds up game development overall.
+Understanding these parameters allows efficient object control and customization in the game. Modify parameters through code or leverage the editor for streamlined object creation and faster game development.

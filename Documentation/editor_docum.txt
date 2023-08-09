@@ -1,26 +1,24 @@
-The engine editor is a user-friendly tool that has several important features. Before starting to work with it, it is recommended to carefully study the documentation, especially the sections describing object_docum and text_docum.
+The engine's editor is a user-friendly tool with several key features. It's recommended to thoroughly review the documentation, particularly the sections covering "object_docum" and "text_docum," before utilizing the editor.
 
-One of the main tools available in the editor is special functions that can be used for component inputs. For example, for the "x" component, you can define the centerx() function, which returns the center position of the "x" axis of the object on the screen. Here is a list of all possible functions for component inputs:
+A significant tool within the editor is the set of specialized functions for component inputs. For instance, the "x" component can utilize the `centerx()` function, which provides the center position of the object along the "x" axis on the screen. Here's a list of available functions for component inputs:
 
-- centerx() - returns the center of the "x" axis.
-- centery() - returns the center of the "y" axis.
-- top() - returns the coordinate of the top point of the screen on the "y" axis.
-- left() - returns the coordinate of the left point of the screen on the "x" axis.
-- bottom() - returns the coordinate of the bottom point of the screen on the "y" axis.
-- right() - returns the coordinate of the right point of the screen on the "x" axis.
-- ww() - returns the screen width.
-- wh() - returns the screen height.
+- `centerx()` - returns the center of the "x" axis.
+- `centery()` - returns the center of the "y" axis.
+- `top()` - returns the top point's "y" axis coordinate on the screen.
+- `left()` - returns the left point's "x" axis coordinate on the screen.
+- `bottom()` - returns the bottom point's "y" axis coordinate on the screen.
+- `right()` - returns the right point's "x" axis coordinate on the screen.
+- `ww()` - returns the screen width.
+- `wh()` - returns the screen height.
 
-Using these functions makes working with component inputs more convenient and efficient.
+Leveraging these functions streamlines component input operations, enhancing convenience and efficiency.
 
 ASSETS:
 
-To import assets into your project, you need to use a special function available in the engine editor. To do this, click on the fourth button from the right, and the engine explorer will open, where you can see all the assets in your project. Then, click on the "+" button to open the explorer on your phone and select the file you want to import as an asset.
+To import assets into your project, utilize a dedicated function within the engine editor. Click on the fourth button from the right to access the engine explorer, which displays all assets in your project. To import a file as an asset, tap the "+" button, opening your phone's explorer to select the desired file.
 
-It is important to note that in the assets, you can also rename files and create new folders. To rename a file, select it from the list and click on the "Rename" button that appears above the file list. To create a new folder in the assets, use the fourth button from the left, which allows you to create a new folder in the current directory.
-
-This way, you can easily import and manage assets in your project using the convenient interface of the engine editor. It will save you time and make your work more efficient.
+By following this approach, you can effortlessly import and manage assets within your project, benefiting from the editor's user-friendly interface that enhances efficiency and time savings.
 
 SCRIPTS:
 
-In UniPy, the location of scripts is important and must adhere to certain rules. All scripts should have the .py extension and be stored in the root folder of the project.
+In UniPy, the placement of scripts carries significance and adheres to specific rules. All scripts must possess the `.py` extension and reside in the root folder of the project.

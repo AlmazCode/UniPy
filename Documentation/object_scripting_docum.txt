@@ -1,5 +1,6 @@
-You can write two types of scripts in UniPy: regular scripts, which can control the entire program, and scripts that are designed to control a single object. Let's write a script that will assign a random color to an object on startup. Here is its implementation:
-```
+In UniPy, you can write two types of scripts: general scripts controlling the entire program, and scripts tailored to manage individual objects. Let's create a script that assigns a random color to an object upon startup. Here's how it's done:
+
+```python
 import random
 
 class random_color:
@@ -8,15 +9,15 @@ class random_color:
 
     def Start(self):
         self.this.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-
 ```
 
-Here we import the required module and create a class. It is important that the name of the class coincides with the name of the script, otherwise an error will occur! In the method `__init__` we don't write anything, but in the method `Start` we set the color. In `self.this` we store a link to the object to which the script is applied!
+In this script, we import the required module and establish a class. Note that the class name must match the script name, or an error will occur. In the `__init__` method, we leave it blank, while in the `Start` method, we assign the color. `self.this` stores a reference to the object the script is applied to.
 
-For the script to be able to control our object, we need to go to the object in the editor and specify the name of our script in the "script" component (you can specify several scripts, separated by commas).
+For the script to control our object, we need to go to the object in the editor and specify the script name in the "script" component. If your script lies in a folder (e.g., "scripts"), use dots in the path: folder.script_name.
 
-Let's consider another problem: we want the object to change its position along the x-axis by s pixels every n seconds. The implementation looks like this:
-```
+Let's address another scenario: moving an object along the x-axis by 's' pixels every 'n' seconds. The implementation is as follows:
+
+```python
 class move:
     def __init__(self):
         self.n = 1
@@ -33,19 +34,6 @@ class move:
             self._tick = 0
 ```
 
-The `__init__` method creates the appropriate variables, the `Start` method converts seconds to frames, and the `Update` method does the rest of the logic. If we attach this script to an object, the inspector will have input fields for `n` and ``s so we can set values (remember that variables whose name begins with "_" or "__" cannot be edited in the inspector!).
+In this script, `__init__` sets variables, `Start` converts seconds to frames, and `Update` handles the logic. When attaching this script to an object, the inspector provides input fields for `n` and `s` values. Remember, variables starting with "_" cannot be edited in the inspector.
 
-UniPy also provides two types of variables: OBJ and PATH. OBJ takes the name of an object, and PATH takes the name of an image/sound. Example usage:
-```
-import UniPy as up
-
-class tutorial:
-    def __init__(self):
-        self.obj = up.OBJ()
-        self.img = up.PATH()
-
-    def Start(self):
-        self.obj.image = self.img
-```
-
-Two variables are created here. In `obj` you need to specify the name of the object, and in `img` the name of the image from your assets.
+By understanding these script structures, you can efficiently control object behavior and create customized interactions within your game.

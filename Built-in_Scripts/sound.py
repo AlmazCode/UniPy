@@ -10,7 +10,7 @@ class sound:
     def __init__(self):
         
         # Variables that can be edited from the inspector
-        self.sound = up.PATH()  # Sound file path
+        self.sound = ""
         self.playAtStart = False  # Flag indicating if the sound should play automatically at start
         self.volume = 100  # Sound volume (percentage)
         self.replay = False  # Flag indicating if the sound should replay
@@ -59,6 +59,7 @@ class sound:
         """
         Start the sound player.
         """
+        self.sound = up.GetSound(self.sound)
         self.SetVolume(self.volume)
         if self.playAtStart:
             self.play()

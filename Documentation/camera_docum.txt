@@ -1,22 +1,22 @@
-In UniPy, the camera creates a mini-object that will follow the specified object.
-The camera in this engine is not yet super-complicated, but it's not terrible either.
-To set the object the camera will follow, you need to use the SetCamera function, example:
+In UniPy, the camera generates a small "mini-object" that tracks a designated object's movement.
+Working with the camera in this engine strikes a balance between simplicity and complexity.
+To assign an object for the camera to track, employ the `SetCamera` function, like this:
 
-```
+```python
 from UniPy import SetCamera
 
 SetCamera("player")
 ```
 
-Here we import the function and call it. You have to specify its name in the editor hierarchy as the object!
+In this code, we import the function and utilize it. Remember to specify the object's name from the editor hierarchy!
 
-You can also change the x and y sides of the camera. This means that the camera will be centered on the object, and there will be additional indentation on both sides depending on x and y. Example:
+Moreover, you can adjust the camera's horizontal and vertical positions. This results in the camera being centered on the object, with added margins on both sides based on the x and y values. For instance:
 
-```
+```python
 import UniPy as up
 
 up.SetCamera("player")
 up.Camera.y = -100
 ```
 
-This code will move the camera up 100 pixels.
+The above code shifts the camera upwards by 100 pixels.
