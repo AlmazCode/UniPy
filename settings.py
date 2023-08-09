@@ -4,7 +4,7 @@ import pather as pt
 pygame.init()
 
 # enigine settings
-version = "alpha 0.1"
+version = "alpha 0.1.1"
 # engine development started on 02/19/2023
 
 # create engine display
@@ -97,8 +97,8 @@ uiBS = width // 8 if height > 720 else width // 18  # UI buttons size, dynamical
 if pt._platform != "Android":
     uiBS = uiBS // 3.5  # If not on Android, further reduce the button size
 uiBFS = 1  # UI button font size
-uiIW = width // 2  # UI input width
-uiIH = uiIW // 4 if height >= width else uiIW // 10  # UI input height, dynamically adjusted for screen orientation
+uiIW = width // 2 if height > width else width // 4  # UI input width
+uiIH = uiIW // 4  # UI input height, dynamically adjusted for screen orientation
 uiSOCP = 10  # Start object components position
 uiWBBR = 15  # Widgets buttons border radius
 uiWIBR = 15  # Widgets inputs, toggle buttons border radius
@@ -111,9 +111,9 @@ uiPMFS = 0  # Project manager fill size
 uiSOHFL = 0  # UI selection object hierarchy fill size
 uiSOHBGFL = 0 # UI selection object hierarchy bg fill size
 uiISIOI = 196  # Image size in the object inspector
-uiFont = f"fonts{pt.s}calibri.ttf" # Engine UI font path
+uiFont = f"assets{pt.s}calibri.ttf" # Engine UI font path
 uiTFont = pygame.font.Font(uiFont, height // 20  if height > 720 else height // 10) # Engine UI font size (big)
-uiTSFont = pygame.font.Font(uiFont, height // 30 if height > 720 else height // 15) # Engine UI font size (small)
+uiTSFont = pygame.font.Font(uiFont, height // 32 if height > 720 else height // 18) # Engine UI font size (small)
 
 # images that won't change their color
 uiII = ["error", "message", "warning"]

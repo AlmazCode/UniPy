@@ -1,7 +1,7 @@
 import platform as ptf
 import getpass
 
-andoirdMachines = ["armv8l", "armv7l", "aarch64"]
+andoirdMachines = ["armv8l", "armv7l", "aarch64", "x86_64"]
 _platform = ptf.system()
 _machine = ptf.uname()[4]
 _defaultPath = None
@@ -18,5 +18,5 @@ elif _platform == "Linux" and _machine not in andoirdMachines:
     s = "/"
 else:
     _platform = "Android"
-    _defaultPath = "/storage/emulated/0/"
+    _defaultPath = "/storage/emulated/0"
     s = "/"

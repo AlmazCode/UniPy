@@ -12,13 +12,12 @@ from UI import (
 
 from objects.object import Object
 from objects.text import Text
-from engineTools import *
 from exporter import build
 
 import engineOUAR as ouar
 import UniPy as pe
 import settings as st
-import os, traceback, shutil, copy, re, sys, collections, zipfile, pygame, importlib
+import os, traceback, shutil, copy, re, sys, collections, zipfile, pygame, importlib, ast
 import pather as pt
 
 pygame.mixer.init()
@@ -36,7 +35,7 @@ OPII = 0
 # import engine assets
 uiEngineImages = {}
 imgs = os.listdir("assets")
-for img in imgs:
+for img in [file for file in imgs if file.split(".")[-1] not in ["otf", "ttf"]]:
     uiEngineImages[img.split(".", 1)[0]] = pygame.image.load(f"assets{pt.s}{img}").convert()
 
 uiEngineImages["down"] = pygame.transform.rotate(uiEngineImages["up"], 180)
@@ -85,7 +84,6 @@ def loadProjectInfoData(path):
 
 # open project
 def openProject(idx):
-    global selectionObjects
     
     st.projectIdx = idx
     
@@ -100,12 +98,11 @@ def openProject(idx):
     # load all files from project
     for i in st.files:
     	
-    	if os.path.splitext(i)[-1] != ".py":
-    	    PB.setItemName(i)
-    	    drawProjects()
-    	    PB.update()
-    	    for msg in message.messages: msg.update()
-    	    pygame.display.flip()
+    	PB.setItemName(i)
+    	drawProjects()
+    	PB.update()
+    	for msg in message.messages: msg.update()
+    	pygame.display.flip()
     	
     	if os.path.splitext(i)[-1] in [".png", ".jpg", ".jpeg"]:
     		txs = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
@@ -127,15 +124,14 @@ def openProject(idx):
     		pe.textures[i].blit(txs, (0, 0))
     		pe.textures[i].set_colorkey(replacement_color)
     	
-    	elif os.path.splitext(i)[-1] in pe._audioTypes: pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+    	elif i.split(".")[-1] in pe._audioTypes: pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
     	
-    	if os.path.splitext(i)[-1] != ".py":
-        	PB.itemLoaded()
-        	drawProjects()
-        	PB.update()
-        	for msg in message.messages: msg.update()
-        	pygame.display.flip()
-    
+    	PB.itemLoaded()
+    	drawProjects()
+    	PB.update()
+    	for msg in message.messages: msg.update()
+    	pygame.display.flip()
+        	
     # load game objects
     ouar.loadObjs(pe, f"{PATH}{pt.s}{st.projects[idx]}{pt.s}ObjectInfo.txt")
     
@@ -143,18 +139,17 @@ def openProject(idx):
     PAC.startPath = f".{pt.s}projects{pt.s}{st.projects[idx]}"
     PAC.setPath()
     
-    SOHM.elements = []
-    for i in pe.objName:
-        SOHM.elements.append(i)
+    SOHM.oY = 0
+    SOHM.elements = pe.objName[:]
     SOHM.normalize()
 
 # functions
 
-def createMessage(surface, text: str, stopTime: int = 90, startTime: int = 30, endTime: int = 30, oX: int = 0, *args):
-    oY = 0
+def createMessage(surface, text: str, stopTime: int = 90, startTime: int = 30, endTime: int = 30, *args):
+    oY = None
     if message.messages:
-        oY = -message.messages[-1].image.get_height() - 10
-    message.Message(surface, message = text, bgColor = st.uiMBGC, font = st.uiFont, textColor = st.uiMTC, borderRadius = st.uiMBR, fillSize = st.uiMFS, startTime = startTime, endTime = endTime, stopTime = stopTime, oX = oX, oY = oY)
+        oY = message.messages[-1].y - message.messages[-1].image.get_height() - 10
+    message.Message(surface, message = text, bgColor = st.uiMBGC, font = st.uiFont, textColor = st.uiMTC, borderRadius = st.uiMBR, fillSize = st.uiMFS, startTime = startTime, endTime = endTime, stopTime = stopTime, y = oY)
 
 # create new project
 def createProject():
@@ -162,15 +157,11 @@ def createProject():
     if not os.path.exists(f"{PATH}{pt.s}new project"):
         os.makedirs(f"{PATH}{pt.s}new project")
         shutil.copytree(f".{pt.s}Built-in_Scripts", f"{PATH}{pt.s}new project{pt.s}Built-in_Scripts")
-        with open(f"{PATH}{pt.s}new project{pt.s}ObjectInfo.txt", "w") as f:
-            f.write("")
     else:
         while 1:
             if not os.path.exists(f"{PATH}{pt.s}new project ({c})"):
                 os.makedirs(f"{PATH}{pt.s}new project ({c})")
                 shutil.copytree(f".{pt.s}Built-in_Scripts", f"{PATH}{pt.s}new project ({c}){pt.s}Built-in_Scripts")
-                with open(f"{PATH}{pt.s}new project ({c}){pt.s}ObjectInfo.txt", "w+") as f:
-                    f.write("")
                 break
             else: c += 1
     
@@ -202,7 +193,7 @@ def AddFileToPAC(path):
             shutil.copy(path, PAC.thisPath)
     except: ...
     
-    if os.path.splitext(path)[-1] in pe._imgTypes:
+    if path.split(".")[-1] in pe._imgTypes:
     	txs = pygame.image.load(path).convert_alpha()
     	f = False
     	pe.textures[path.split(pt.s)[-1]] = pygame.image.load(path).convert()
@@ -221,7 +212,7 @@ def AddFileToPAC(path):
     	pe.textures[path.split(pt.s)[-1]].blit(txs, (0, 0))
     	pe.textures[path.split(pt.s)[-1]].set_colorkey(replacement_color)
     
-    elif os.path.splitext(path)[-1] in pe._audioTypes:
+    elif path.split(".")[-1] in pe._audioTypes:
         pe.audios[path.split(pt.s)[-1]] = pygame.mixer.Sound(path)
     
     PAC.setPath(PAC.thisPath)
@@ -244,6 +235,7 @@ def loadModules(fpm = False):
         try: sys.modules.pop(script.__name__)
         except: pass
     st.modules = []
+    st.files, st.dirs = loadAllFilesFromDir(f"{PATH}{pt.s}{st.projects[st.projectIdx]}")
     
     for file in st.files:
         if file[-3:] == ".py":
@@ -280,6 +272,7 @@ def OpenMenuToExportProject():
     vr = loadProjectInfoData(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")[1]
     InputSetExportProjectVersion.text = vr
     InputSetExportProjectVersion.check_text()
+    AEPME()
     st.drawingLayer = 4
 
 def CloseMenuToExportProject():
@@ -310,6 +303,30 @@ def deleteFileInPAC():
         shutil.rmtree(path)
     PAC.reOpenPath()
 
+# EDITOR FUNCS
+def centerx():
+    idx = pe.objName.index(st.lastSelectionObject)
+    return st.AppWidth // 2 - pe.objects[idx].width // 2
+
+def centery():
+    idx = pe.objName.index(st.lastSelectionObject)
+    return st.AppHeight // 2 - pe.objects[idx].height // 2
+
+def top(): return 0
+def left(): return 0
+
+def bottom():
+    idx = pe.objName.index(st.lastSelectionObject)
+    return st.AppHeight - pe.objects[idx].height
+
+def right():
+    idx = pe.objName.index(st.lastSelectionObject)
+    return st.AppWidth - pe.objects[idx].width
+
+def ww(): return st.AppWidth
+def wh(): return st.AppHeight
+####
+
 # close object info
 def closeObjectInfo():
     
@@ -318,19 +335,17 @@ def closeObjectInfo():
 
 # delete game object
 def deleteObj():
-    global OPIE, selectionObjects
+    global OPIE
     
-    idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
+    idx = pe.objName.index(SOHM.ename)
     pe.objName.pop(idx)
     pe.objClass.pop(idx)
     pe.objects.pop(idx)
     st.lastSelectionObject = None
     ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
     
-    SOHM.elements = []
+    SOHM.elements = pe.objName[:]
     SOHM.elem_idx = -1
-    for i in pe.objName:
-        SOHM.elements.append(i)
     SOHM.normalize()
 
 # back path in conductor
@@ -345,7 +360,7 @@ def startCRfromPAC():
     
     fileConductor.content = ""
     fileConductor.func = AddFileToPAC
-    fileConductor.startPath = f"{pt.s}storage{pt.s}emulated{pt.s}0"
+    fileConductor.startPath = pt._defaultPath
     fileConductor.setPath(fileConductor.thisPath)
     
 def startCRfromMoveFile():
@@ -569,11 +584,12 @@ def objectUp():
     idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
     
     if idx > 0:
-        SOHM.elements[idx], SOHM.elements[idx-1] = SOHM.elements[idx-1], SOHM.elements[idx]
         pe.objName[idx], pe.objName[idx-1] = pe.objName[idx-1], pe.objName[idx]
         pe.objects[idx], pe.objects[idx-1] = pe.objects[idx-1], pe.objects[idx]
         pe.objClass[idx], pe.objClass[idx-1] = pe.objClass[idx-1], pe.objClass[idx]
         SOHM.elem_idx -= 1
+        SOHM.elements = pe.objName[:]
+        SOHM.normalize()
         ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
 
 # move down an object in the hierarchy
@@ -581,22 +597,23 @@ def objectDown():
     idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
     
     if idx != len(SOHM.elements)-1:
-        SOHM.elements[idx], SOHM.elements[idx+1] = SOHM.elements[idx+1], SOHM.elements[idx]
         pe.objName[idx], pe.objName[idx+1] = pe.objName[idx+1], pe.objName[idx]
         pe.objects[idx], pe.objects[idx+1] = pe.objects[idx+1], pe.objects[idx]
         pe.objClass[idx], pe.objClass[idx+1] = pe.objClass[idx+1], pe.objClass[idx]
         SOHM.elem_idx += 1
+        SOHM.elements = pe.objName[:]
+        SOHM.normalize()
         ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
 
 # copy object
 def copyObject():
-    idx = pe.objName.index(SOHM.elements[SOHM.elem_idx])
+    idx = pe.objName.index(SOHM.ename)
     
     pe.objects.append(copy.copy(pe.objects[idx]))
     pe.objName.append(f"{pe.objName[idx]} (1)")
     pe.objClass.append(pe.objClass[idx])
-    SOHM.elements.append(f"{pe.objName[idx]} (1)")
-    SOHM.elem_idx = len(pe.objects)-1
+    SOHM.elements = pe.objName[:]
+    SOHM.elem_idx = len(SOHM.elements)-1
     SOHM.normalize()
     
     ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
@@ -620,7 +637,7 @@ def loadObjectScriptLinks(one = False):
     for obj in pe.objects[n:]:
         if obj.script != "None":
             err = False
-            scripts = [i.strip() for i in obj.script.split(",")]
+            scripts = [i.strip().split(".")[-1] for i in obj.script.split(",")]
             
             ss = [i for i in obj.S_CONTENT]
             for s in ss:
@@ -644,43 +661,53 @@ def loadObjectScriptLinks(one = False):
                     _console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
                     err = True
                     continue
-                    
-            obj.SSC()
             
-            idx = 0
-            for ojj in scripts:
-                if ojj in mn:
-                    try: _v = [var for var in dir(obj.S_LINKS[idx]) if not callable(getattr(obj.S_LINKS[idx], var)) and not var.startswith("__")]
+            for idx, ojj in enumerate(scripts):
+                if ojj in mn and ojj in obj.S_CONTENT:
+                    try: _v = [var for var in dir(obj.S_LINKS[idx]) if not callable(getattr(obj.S_LINKS[idx], var)) and not var.startswith("_")]
                     except: continue
-                    if "this" in _v: del _v[_v.index("this")]
-
+                    if "this" in _v: _v.remove("this")
                     for jjj in _v:
-                        vv = obj.S_CONTENT[ojj][jjj][0]
-                        vvt = obj.S_CONTENT[ojj][jjj][1]
-                        if vvt in ["PATH", "OBJ"]: vv = eval(vv)
-                        
-                        exec(f"obj.S_LINKS[{idx}].{jjj} = vv")
-                idx += 1
+                        if jjj in obj.S_CONTENT[ojj] and obj.SC_CHANGED[ojj][jjj]:
+                            vv = obj.S_CONTENT[ojj][jjj][0]
+                            vvt = obj.S_CONTENT[ojj][jjj][1]
+                            exec(f"obj.S_LINKS[{idx}].{jjj} = vv")
 
 def loadOBJScriptLinks(idx):
     obj = pe.objects[idx]
-    idxs = [pe.OWS.index(i) for i in obj.S_LINKS]
-    obj.S_LINKS = []
+    scripts = [script.strip() for script in obj.script.split(",")] if obj.script != "None" else {}
     
-    if obj.script != "None":
-        scripts = [i.strip() for i in obj.script.split(",")]
-        mn = [i.__name__.split(".")[-1] for i in st.modules]
-
-        for ojj in scripts:
-            
+    result = {}
+    
+    if scripts:
+        for script in scripts:
+            parsed_ast = None
+            result[script] = {}
             try:
-                if ojj in mn:
-                    pe.OWS.append(eval(f"st.modules[mn.index(\"{ojj}\")].{ojj}()"))
-                    pe.OWS[-1].this = obj
-                    obj.S_LINKS.append(pe.OWS[-1])
-            except: pass
-        obj.SSC()
+                with open(f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}{script.replace('.', pt.s)}.py") as code:
+                    parsed_ast = ast.parse(code.read())
+            except:
+                return {}
+            
+            idx = next((i for i, bd in enumerate(parsed_ast.body) if isinstance(bd, ast.ClassDef)), None)
+            
+            if idx is not None:
+                init_body = parsed_ast.body[idx].body[0].body
                 
+                for statement in init_body:
+                    if isinstance(statement, ast.Assign):
+                        for target in statement.targets:
+                            if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == 'self':
+                                variable_name = target.attr
+                                try: variable_value = ast.literal_eval(statement.value)
+                                except: variable_value = "func & unknown"
+                                if not variable_name.startswith("_") and variable_value != None:
+                                    result[script][variable_name] = variable_value
+            
+        return result
+    else:
+        return {}
+    
 # start app
 def startApp():
     global error
@@ -692,6 +719,7 @@ def startApp():
     pe.OON = pe.objName.copy()
     pe.OWS = []
     pe.Camera.target = None
+    pe.Camera.x, pe.Camera.y = 0, 0
     
     MHFS = []
     st.MHFU = []
@@ -777,9 +805,8 @@ def createObject(Class):
     btShowPanel.adjust_dimensions_and_positions()
     ouar.addObj(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt", Class)
     
-    SOHM.elements = []
-    for i in pe.objName:
-        SOHM.elements.append(i)
+    SOHM.elements = pe.objName[:]
+    SOHM.elem_idx = -1
     SOHM.normalize()
 
 # change object property
@@ -795,10 +822,14 @@ def changeObjProperty(key, content = None):
             break
     
     if key == "name":
-        SOHM.elements[SOHM.last_elem] = ObjName.text
-        SOHM.normalize()
-        pe.objName[idx] = ObjName.text
-        st.lastSelectionObject = ObjName.text
+        if ObjName.text.strip() not in pe.objName:
+            pe.objName[idx] = ObjName.text
+            SOHM.elements = pe.objName[:]
+            SOHM.normalize()
+            st.lastSelectionObject = ObjName.text
+        else:
+            ObjName.text = pe.objName[idx]
+            createMessage(st.win, f"Oops, an object with that name already exists.", stopTime = 120)
         
     elif key == "x":
         try:
@@ -924,9 +955,7 @@ def changeObjProperty(key, content = None):
         
         if c == 0:
             pe.objects[idx].script = ObjScript.text
-            loadModules()
                     	
-            loadOBJScriptLinks(idx)
             setObjProperty(st.lastSelectionObject, False)
     
     elif key == "font":
@@ -939,16 +968,15 @@ def changeObjProperty(key, content = None):
     
     elif key == "image":
         st.drawingLayer = 0
+        fileConductor.thisPath = pt._defaultPath
         
-        if content != None:
-            try:
-                pe.objects[idx].image = pe.textures[content.split(pt.s)[-1]] if not pe.objects[idx].useFullAlpha else pe.texturesTSP[content.split(pt.s)[-1]]
-                pe.objects[idx].imagePath = content.split(pt.s)[-1]
-                ObjWidth.text = str(pe.objects[idx].width)
-                ObjHeight.text = str(pe.objects[idx].height)
-                ADP_OIII(idx)
-            except: pass
-        else:
+        if content != None and content.split('.')[-1] in pe._imgTypes:
+            pe.objects[idx].image = pe.textures[content.split(pt.s)[-1]] if not pe.objects[idx].useFullAlpha else pe.texturesTSP[content.split(pt.s)[-1]]
+            pe.objects[idx].imagePath = content.split(pt.s)[-1]
+            ObjWidth.text = str(pe.objects[idx].width)
+            ObjHeight.text = str(pe.objects[idx].height)
+            ADP_OIII(idx)
+        elif content == None:
             pe.objects[idx].image = content
             pe.objects[idx].imagePath = content
             OIII = None
@@ -961,43 +989,34 @@ def changeObjProperty(key, content = None):
     
     ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
 
-def setScriptVarValue(script, type, var, value, LIST = None, OBJ = None, cr = False):
+def setScriptVarValue(script, type, var, value, OBJ = None):
     idx = pe.objName.index(st.lastSelectionObject)
     obj = pe.objects[idx]
     
-    try:
-        if type == "OBJ":
-            _val = value
-            value = f"pe.GetObj('{value}')"
-                
-        elif type == "PATH":
-            _val = value
-            if value in [i.split(".")[0] for i in pe.audios]: value = f"pe.GetSound('{value}')"
-            elif value in [i.split(".")[0] for i in pe.textures]: value = f"pe.GetTexture('{value}')"
-            else: a = a
-                
-        elif type == "NoneType":
-            _val = str(eval(value))
-            value = eval(value)
-        
-        elif type == "str":
-            _val = value
+   # try:
+    value = eval(f"{type}('{value}')")
+    _val = str(value)
             
+    g = loadOBJScriptLinks(idx)
+    if script.split(".")[-1] in obj.SC_CHANGED:
+        if g[script][var] == value:
+            obj.SC_CHANGED[script.split(".")[-1]][var] = False
         else:
-                value = eval(f"{type}({value})")
-                _val = str(value)
-                    
-        mn = [i.__name__.split(".")[-1] for i in st.modules]
-        if eval(f"st.modules[mn.index(\"{script}\")].{script}().{var}") == value: obj.SC_CHANGED[script][var] = False
-        else: obj.SC_CHANGED[script][var] = True
-                    
-        obj.S_CONTENT[script][var][0] = value
-            
-        OBJ.text = _val 
-                    
-        ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
-    except:
-        OBJ.set_old_text()
+            obj.SC_CHANGED[script.split(".")[-1]][var] = True
+    else:
+        obj.S_CONTENT[script.split(".")[-1]] = {}
+        obj.SC_CHANGED[script.split(".")[-1]] = {}
+        obj.S_CONTENT[script.split(".")[-1]][var] = [g[script][var], type]
+        obj.SC_CHANGED[script.split(".")[-1]][var] = True
+                            
+    if var not in obj.S_CONTENT[script.split(".")[-1]]:
+        obj.S_CONTENT[script.split(".")[-1]][var] = [value, type]
+        obj.SC_CHANGED[script.split(".")[-1]][var] = True
+    else:
+        obj.S_CONTENT[script.split(".")[-1]][var][0] = value
+    ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
+    #except:
+#        OBJ.set_old_text()
 
 # load object property
 def setObjProperty(text, resetOPII = True):
@@ -1024,6 +1043,9 @@ def setObjProperty(text, resetOPII = True):
        objComponents = [ObjName, ObjX, ObjY, ObjText, ObjFontSize, ObjLoadFont, ObjColor, ObjTSP, ObjAngle, ObjCX, ObjCY, ObjTC, ObjLayer, ObjTag, ObjRender, ObjFlipX, ObjFlipY, ObjRichText, ObjUseCamera, ObjSmooth, ObjScript]
        fileConductor.content = "'font'"
        btDeleteCR.content = "('font', None)"
+   
+    elif pe.objClass[idx] == "Group":
+        objComponents = [ObjName, ObjX, ObjY, ObjRender, ObjTag, ObjScript]
        
     idxx = 1
     objComponents[0].rect.y = st.uiSOCP
@@ -1063,43 +1085,44 @@ def setObjProperty(text, resetOPII = True):
         ObjFontSize.text = str(pe.objects[idx].sfs)
     
     if pe.objects[idx].S_LINKS != {}:
-        loadModules()
-        loadOBJScriptLinks(idx)
-    
-    ss = [i.strip() for i in pe.objects[idx].script.split(",")]
-    ssIdx = 0
-    for s in pe.objects[idx].S_LINKS:
-        _v = [var for var in dir(s) if not callable(getattr(s, var)) and not var.startswith("__") and not var.startswith("_")]
+        inf = loadOBJScriptLinks(idx)
+    ile = False
+    for s in inf:
+        _vars = list(inf[s])
+        _values = list(inf[s].values())
             
-        if "this" in _v: del _v[_v.index("this")]
-        CSTN.append(st.uiTFont.render(ss[ssIdx], 0, st.uiTColor))
+        if "this" in _vars: _vars.remove("this")
+        CSTN.append(st.uiTFont.render(s.split(".")[-1], 0, st.uiTColor))
         CSTN_POS.append([50, objComponents[idxx - 1].rect.y + objComponents[idxx - 1].rect.height + 20])
+        if _vars == [] and not ile:
+            ile = True
+        elif ile:
+            CSTN_POS[-1][1] += CSTN[-2].get_height() + 20
         FINS = False
-        for d in _v:
+        for var, value in zip(_vars, _values):
+            tp = type(value).__name__
             
-            vv = eval("pe.objects[idx].S_CONTENT[ss[ssIdx]][d][0]")
-            
-            val = eval(f"pe.objects[idx].S_LINKS[ssIdx].{d}")
-            tp = type(eval(f"pe.objects[idx].S_LINKS[ssIdx].{d}")).__name__
-            
-            if tp == "PATH": vv = vv.split("(", 1)[-1][1:-2]
-            elif tp == "OBJ": vv = vv[11:-2]
+            if pe.objects[idx].S_CONTENT != {} and var in pe.objects[idx].S_CONTENT[s.split(".")[-1]]:
+                if pe.objects[idx].SC_CHANGED[s.split(".")[-1]][var]:
+                    value = pe.objects[idx].S_CONTENT[s.split(".")[-1]][var][0]
             
             if tp == "bool":
-                objComponents.append(toggleButton.ToggleButton(st.win, d, setScriptVarValue, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC, content = f"('{ss[ssIdx]}', '{tp}', self.key, str(self.active), None, self)", active = vv))
+                objComponents.append(toggleButton.ToggleButton(st.win, var, setScriptVarValue, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC, content = f"('{s}', '{tp}', self.key, str(self.active))", active = value))
             else:
-                objComponents.append(input.Input(st.win, setScriptVarValue, noText = "value...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = d, content = f"('{ss[ssIdx]}', '{tp}', self.key, self.text, None, self)", textColor = st.uiITC, text = str(vv)))
+                objComponents.append(input.Input(st.win, setScriptVarValue, noText = f"value ({tp})...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = var, content = f"('{s}', '{tp}', self.key, self.text, self)", textColor = st.uiITC, text = str(value)))
             objComponents[-1].rect.y = objComponents[idxx - 1].rect.y + objComponents[idxx - 1].rect.height + 20
             if not FINS:
                 objComponents[-1].rect.y += CSTN[-1].get_height() + 20
                 FINS = True
+            if ile:
+                objComponents[-1].rect.y += CSTN[-2].get_height() + 20
+                ile = False
             objComponents[-1].start_y = objComponents[-1].rect.y
-            objCm = st.uiTSFont.render(re.sub(r'(?<!^)([A-Z])', r' \1', str(objComponents[-1].key)).title(), 0, st.uiTColor)
+            objCm = st.uiTSFont.render(re.sub(r'(?<!^)([A-Z])', r' \1', str(var)).title(), 0, st.uiTColor)
             compiledTextes_FOC.append(objCm)
             CTFOCXOF.append(40)
             objComponents[-1].rect.x = objCm.get_width() + 60
             idxx += 1
-        ssIdx += 1
         
     OPII = 0 if resetOPII else OPII      
     for i in objComponents:
@@ -1248,7 +1271,7 @@ ObjSW = sohManager.SOHManager(st.win, changeObjProperty, fontPath = st.uiFont, b
 fileConductor = conductor.Conductor(st.win, changeObjProperty, width = st.width, height = st.height, fontSize = 60, y = 20 + st.uiBS, color = st.uiCC, fontPath = st.uiFont, elemColor = st.uiCEC, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], content = "'image'", textColor = st.uiCTC, elemSelectedColor = st.uiCSEC, scrollSpeed = st.scrollSpeed)
 
 # projects assets conductor
-PAC = conductor.Conductor(st.win, None, width = st.width, height = st.height, fontSize = 60, y = 20 + st.uiBS, color = st.uiCC, fontPath = st.uiFont, elemColor = st.uiCEC, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], onlyView = True, textColor = st.uiCTC, elemSelectedColor = st.uiCSEC, codeFontPath = f"fonts{pt.s}Menlo-Regular.ttf", kColor = st.uiCCKC, fColor = st.uiCCFC, cColor = st.uiCCCC, sColor = st.uiCCSC, nColor = st.uiCCNC, CbgColor = st.uiCCBGC, vColor = st.uiCCVC, scrollSpeed = st.scrollSpeed)
+PAC = conductor.Conductor(st.win, None, width = st.width, height = st.height, fontSize = 60, y = 20 + st.uiBS, color = st.uiCC, fontPath = st.uiFont, elemColor = st.uiCEC, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], onlyView = True, textColor = st.uiCTC, elemSelectedColor = st.uiCSEC, codeFontPath = f"assets{pt.s}Menlo-Regular.ttf", kColor = st.uiCCKC, fColor = st.uiCCFC, cColor = st.uiCCCC, sColor = st.uiCCSC, nColor = st.uiCCNC, CbgColor = st.uiCCBGC, vColor = st.uiCCVC, scrollSpeed = st.scrollSpeed)
 
 # input for rename file in project assets conductor
 IFFIPAC = input.Input(st.win, endRenameFilePAC, noText = "Name...", maxChars = 256, width = PAC.elemWidth, height = PAC.elemHeight, fontSize = 40, fontPath = st.uiFont, color = PAC.elemColor, pressedColor = st.uiIPC, x = 10, ATL = False, textColor = st.uiITC)
@@ -1265,7 +1288,7 @@ IFRPIPM = input.Input(st.win, endRenameProject, noText = "Name...", maxChars = 2
 SOHM = sohManager.SOHManager(st.win, setObjProperty, fontPath = st.uiFont, y = 10, x = 10, borderRadius = st.uiWPEOEEBR, color = st.uiSOHC, elemColor = st.uiSOHEC, width = st.width // 1.3, height = st.height - 20, content = "(self.elements[self.elem_idx])", elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL)
 
 # selection new object panel
-SNOP = sohManager.SOHManager(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - st.height // 2 - 10, x = btShowPanel.rect.right - st.width // 1.5, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 1.5, height = st.height // 2, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], maxD = 5, minD = 3.5, elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL)
+SNOP = sohManager.SOHManager(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - st.height // 2 - 10, x = btShowPanel.rect.right - st.width // 1.5, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 1.5 if st.width < st.height else st.width // 3, height = st.height // 2, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], maxD = 5, minD = 3.5, elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL)
 
 # engine console
 _console = console.Console(st.win, height = st.AppHeight // 2, width = st.AppWidth, font = st.uiFont, y = st.AppHeight - st.AppHeight // 2, bgColor = st.uiCBC, logImg = uiEngineImages["message"], errorImg = uiEngineImages["error"], warningImg = uiEngineImages["warning"], scrollSpeed = st.scrollSpeed)
@@ -1279,12 +1302,12 @@ uiEPME = [btSetExportPath, InputSetExportProjectVersion]
 
 def AEPME():
     global uiEPMT
+    st.EPT = st.uiTFont.render("Project Export", 0, st.uiTColor)
     uiEPMT = [st.uiTSFont.render(tx, 0, st.uiTColor) for tx in uiEPMST]
-    y = 10
+    y = st.EPT.get_height() + 50
     for idx, tx in enumerate(uiEPMT):
         uiEPME[idx].rect.y = y + tx.get_height() + 30
         y += tx.get_height() + 60 + uiEPME[idx].rect.height
-AEPME()
 
 # function for draw engine UI
 def drawUI():
@@ -1346,7 +1369,7 @@ def drawApp():
     	    error = True
     	    tb = e.__traceback__
     	    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
-    	    _console.Log(f"UniPy Error: in script \"{filename.split('pt.s')[-1]}\": in line [{line_num}]\n{e}", "error")
+    	    _console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
 
     pe.Camera.update()
     
@@ -1364,11 +1387,11 @@ def drawApp():
     if st.isConsole: _console.update(st.MP, st.MBP)
     
     appFps = st.uiTSFont.render(f"Fps: {str(int(st.clock.get_fps()))}", 0, st.uiTColor)
-    st.win.blit(appFps, (10, st.height - appFps.get_height() - 10))
+    st.win.blit(appFps, (10, st.height - appFps.get_height() // 2 - (st.height - st.AppHeight) // 2))
     
     if error:
         appError = st.uiTSFont.render(f"[Error]", 0, (255, 0, 0))
-        st.win.blit(appError, (appFps.get_width() + 30, st.height - appFps.get_height() - 10))
+        st.win.blit(appError, (appFps.get_width() + 30, st.height - appFps.get_height() // 2 - (st.height - st.AppHeight) // 2))
 
 # draw conductor
 def drawCR():
@@ -1420,7 +1443,9 @@ def drawExportProject():
     btCloseExportProject.update()
     btExportProject.update()
     
-    y = 10
+    st.win.blit(st.EPT, (10, 10))
+    
+    y = st.EPT.get_height() + 50
     for tx, elem in zip(uiEPMT, uiEPME):
         st.win.blit(tx, (10, y))
         elem.update()

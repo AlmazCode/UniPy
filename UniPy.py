@@ -26,27 +26,20 @@ _varTypes = [
                 "bool",
                 "list",
                 "tuple",
-                "dict"
+                "dict",
+                "set"
                     ]
 _audioTypes = [
-                    ".mp3",
-                    ".ogg",
-                    ".wav",
-                    ".flac"
+                    "mp3",
+                    "ogg",
+                    "wav",
+                    "flac"
                         ]
 _imgTypes = [
-                ".png",
-                ".jpg",
-                ".jpeg"
+                "png",
+                "jpg",
+                "jpeg"
                     ]
-
-class OBJ:
-    def __init__(self):
-        self.value = ""
-
-class PATH:
-    def __init__(self):
-        self.value = ""
 
 def Error(file, line, error, _type):
     if _type == "error": eui.error = True
@@ -112,7 +105,7 @@ def GetModule(name: str):
     line = caller_frame.f_lineno
     Error(file, line, f"\"{name}\" is not defined", "warning")
 
-def consoleLog(text: str):
+def log(text: str):
 	caller_frame = inspect.currentframe().f_back
 	file = caller_frame.f_code.co_filename
 	line = caller_frame.f_lineno
@@ -157,7 +150,7 @@ def GetTexture(name: str, fullAlpha: bool = False):
         
 def GetSound(name: str):
     faus = [i for i in audios]
-    aus = [i.split({pt.s})[-1].rsplit(".", 1)[0] for i in audios]
+    aus = [i.split(pt.s)[-1].rsplit(".", 1)[0] for i in audios]
     
     if name in aus:
 
@@ -207,15 +200,7 @@ def distance(obj1, obj2):
     return ((obj2.rect.x - obj1.rect.x) ** 2 + (obj2.rect.y - obj1.rect.y) ** 2) ** (0.5)
     
 def GetObjectsWithTag(name: str):
-    _res = []
-    for obj in objects:
-        if obj.tag == name:
-            _res.append(obj)
-    
-    return _res
+    return [obj for obj in objects if obj.tag == name]
 
-# exit from app
 def appQuit(): eui.returnToEditor()
-
-# reload the app
 def reloadApp(): eui.startApp()

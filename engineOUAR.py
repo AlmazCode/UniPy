@@ -1,136 +1,74 @@
 from objects.object import Object
 from objects.text import Text
 import settings as st
-import re
+import re, os
+
+regex = re.compile(r',\s*\n')
+
+defaultComponents = {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0,
+            "render": True,
+            "image": None,
+            "bd": "None",
+            "a": 0,
+            "sw": 0,
+            "sh": 0,
+            "fx": False,
+            "fy": False,
+            "sx": 0,
+            "sy": 0,
+            "cx": "None",
+            "cy": "None",
+            "tsp": 255,
+            "ufa": False,
+            "s": "None",
+            "sc": {},
+            "scc": {},
+            "color": [255, 255, 255],
+            "uc": False,
+            "l": 0,
+            "t": "obj",
+            "text": "text",
+            "fs": 32,
+            "font": None,
+            "sfs": 32,
+            "tc": "left",
+            "rt": False,
+            "sm": False,
+            }
 
 def loadObjs(pe, path, IDX = -1):
-    # load objects
+    
+    if not os.path.exists(path):
+        with open(path, "w+") as f:
+            f.write("")
+    
     file = open(path, "r").read()
     get = file.split("!next!")
-    regex = re.compile(r',\s*\n')
     
     if file != "":
-        
         if IDX != -1: get = get[IDX: IDX+1]
-        idx = 0
-        for i in get:
+        
+        for idx, i in enumerate(get):
             get2 = regex.split(i)
-            if IDX == -1: pe.objClass.append(get2[1].strip())
-            
+            if IDX == -1:
+                pe.objClass.append(get2[1].strip())
+                pe.objName.append(get2[0].strip() if get2[0].strip() not in pe.objName else f"{get2[0].strip()} (rename it!)")
+            cm = defaultComponents.copy()
+            for _obj0xfg in get2[2:]:
+                _obj0xfg = _obj0xfg.split(":", 1)
+                try: val = eval(f"{_obj0xfg[1][1:]}")
+                except: val = _obj0xfg[1][1:].strip()
+                cm[_obj0xfg[0]] = val
+                
             if get2[1].strip() == "Object":
-                
-                try: x = int(get2[2][3:])
-                except: x = 0
-                try: y = int(get2[3][3:])
-                except: y = 0
-                try: w = int(get2[4][3:])
-                except: w = 0
-                try: h = int(get2[5][3:])
-                except: h = 0
-                try: render = eval(get2[6][8:])
-                except: render = True
-                try: image = get2[7][7:]
-                except: image = None
-                try: bd = get2[8][4:].strip()
-                except: bd = "None"
-                try: a = int(get2[9][3:])
-                except: a = 0
-                try: sw = int(get2[10][4:])
-                except: sw = 0
-                try: sh = int(get2[11][4:])
-                except: sh = 0
-                try: fx = eval(get2[12][4:])
-                except: fx = False
-                try: fy = eval(get2[13][4:])
-                except: fy = False
-                try: sx = int(get2[14][4:])
-                except: sx = 0
-                try: sy = int(get2[15][4:])
-                except: sy = 0
-                try: cx = get2[16][4:].strip()
-                except: cx = "None"
-                try: cy = get2[17][4:].strip()
-                except: cy = "None"
-                try: tsp = int(get2[18][5:])
-                except: tsp = 255
-                try: ufa = eval(get2[19][5:])
-                except: ufa = False
-                try: s = get2[20][3:].strip()
-                except: s = "None"
-                try: sc = eval(get2[21][4:])
-                except: sc = {}
-                try: scc = eval(get2[22][5:])
-                except: scc = {}
-                try: c = eval(get2[23][3:].strip())
-                except: c = (255, 255, 255)
-                try: uc = eval(get2[24][4:])
-                except: uc = True
-                try: l = eval(get2[25][3:])
-                except: l = 0
-                try: t = get2[26][3:].strip()
-                except: t = "obj"
-                
-                if IDX == -1: pe.objName.append(get2[0].strip())
-                pe.objects.append(Object(st.winApp, x, y, w, h, render, image, bd, a, sw, sh, fx ,fy, sx, sy, cx, cy, tsp, ufa, s, sc, scc, c, uc, get2[0].strip(), l, t))
-            
+                pe.objects.append(Object(st.winApp, cm["x"], cm["y"], cm["w"], cm["h"], cm["render"], cm["image"], cm["bd"], cm["a"], cm["sw"], cm["sh"], cm["fx"], cm["fy"], cm["sx"], cm["sy"], cm["cx"], cm["cy"], cm["tsp"], cm["ufa"], cm["s"], cm["sc"], cm["scc"], cm["color"], cm["uc"], get2[0].strip(), cm["l"], cm["t"]))
             elif get2[1].strip() == "Text":
-                
-                try: x = int(get2[2][3:])
-                except: x = 0
-                try: y = int(get2[3][3:])
-                except: y = 0
-                try: text = get2[4][6:]
-                except: text = "text"
-                try: fs = int(get2[5][4:])
-                except: fs = 32
-                try: font = get2[6][6:].strip()
-                except: font = "None"
-                try: color = eval(get2[7][7:].strip())
-                except: color = (0, 0, 0)
-                try: tsp = int(get2[8][5:])
-                except: tsp = 255
-                try: a = int(get2[9][3:])
-                except: a = 0
-                try: render = eval(get2[10][8:])
-                except: render = True
-                try: fx = eval(get2[11][4:])
-                except: fx = False
-                try: fy = eval(get2[12][4:])
-                except: fy = False
-                try: cx = get2[13][4:].strip()
-                except: cx = "None"
-                try: cy = get2[14][4:].strip()
-                except: cy = "None"
-                try: sx = int(get2[15][4:])
-                except: sx = 0
-                try: sy = int(get2[16][4:])
-                except: sy = 0
-                try: sfs = int(get2[17][5:])
-                except: 32
-                try: tc = get2[18][4:].strip()
-                except: tc = "left"
-                try: rt = eval(get2[19][3:])
-                except: rt = False
-                try: s = get2[20][3:].strip()
-                except: s = "None"
-                try: sc = eval(get2[21][4:])
-                except: sc = {}
-                try: scc = eval(get2[22][5:])
-                except: scc = {}
-                try: uc = eval(get2[23][4:])
-                except: uc = True
-                try: l = eval(get2[24][3:])
-                except: l = 0
-                try: t = get2[25][3:].strip()
-                except: t = "obj"
-                try: sm = eval(get2[26][4:])
-                except: sm = False
-                
-                if IDX == -1: pe.objName.append(get2[0].strip())
-                pe.objects.append(Text(st.winApp, x, y, text, fs, font, color, tsp, a, render, fx, fy, cx, cy, sx, sy, sfs, tc, rt, s, sc, scc, uc, get2[0].strip(), l, t, sm))
-            
-            idx += 1
-
+                pe.objects.append(Text(st.winApp, cm["x"], cm["y"], cm["text"], cm["fs"], cm["font"], cm["color"], cm["tsp"], cm["a"], cm["render"], cm["fx"], cm["fy"], cm["cx"], cm["cy"], cm["sx"], cm["sy"], cm["sfs"], cm["tc"], cm["rt"], cm["s"], cm["sc"], cm["scc"], cm["uc"], get2[0].strip(), cm["l"], cm["t"], cm["sm"]))
+        
 def writeObj(pe, idx, _type):
     if _type == "Object":
         return f"""{pe.objName[idx]},
@@ -140,8 +78,8 @@ y: {pe.objects[idx].y},
 w: {pe.objects[idx].width},
 h: {pe.objects[idx].height},
 render: {pe.objects[idx].render},
-image: {pe.objects[idx].imagePath},
-bd: {pe.objects[idx].bodyType},
+image: '{pe.objects[idx].imagePath}',
+bd: '{pe.objects[idx].bodyType}',
 a: {pe.objects[idx].angle},
 sw: {pe.objects[idx].SW},
 sh: {pe.objects[idx].SH},
@@ -149,89 +87,79 @@ fx: {pe.objects[idx].flipX},
 fy: {pe.objects[idx].flipY},
 sx: {pe.objects[idx].sx},
 sy: {pe.objects[idx].sy},
-cx: {pe.objects[idx].cx},
-cy: {pe.objects[idx].cy},
+cx: '{pe.objects[idx].cx}',
+cy: '{pe.objects[idx].cy}',
 tsp: {pe.objects[idx].transparent},
 ufa: {pe.objects[idx].useFullAlpha},
-s: {pe.objects[idx].script},
+s: '{pe.objects[idx].script}',
 sc: {pe.objects[idx].S_CONTENT},
 scc: {pe.objects[idx].SC_CHANGED},
-c: {pe.objects[idx].color},
+color: {pe.objects[idx].color},
 uc: {pe.objects[idx].useCamera},
-l: {pe.objects[idx].layer},
-t: {pe.objects[idx].tag}"""
+t: '{pe.objects[idx].tag}',
+l: {pe.objects[idx].layer}"""
 
     elif _type == "Text":
         return f"""{pe.objName[idx]},
 {_type},
 x: {pe.objects[idx].x},
 y: {pe.objects[idx].y},
-text: {pe.objects[idx].text},
+text: '{pe.objects[idx].text}',
 fs: {pe.objects[idx].fontSize},
-font: {pe.objects[idx].fontPath},
+font: '{pe.objects[idx].fontPath}',
 color: {pe.objects[idx].color},
 tsp: {pe.objects[idx].transparent},
 a: {pe.objects[idx].angle},
 render: {pe.objects[idx].render},
 fx: {pe.objects[idx].flipX},
 fy: {pe.objects[idx].flipY},
-cx: {pe.objects[idx].cx},
-cy: {pe.objects[idx].cy},
+cx: '{pe.objects[idx].cx}',
+cy: '{pe.objects[idx].cy}',
 sx: {pe.objects[idx].sx},
 sy: {pe.objects[idx].sy},
 sfs: {pe.objects[idx].sfs},
-tc: {pe.objects[idx].textCentering},
+tc: '{pe.objects[idx].textCentering}',
 rt: {pe.objects[idx].richText},
-s: {pe.objects[idx].script},
+s: '{pe.objects[idx].script}',
 sc: {pe.objects[idx].S_CONTENT},
 scc: {pe.objects[idx].SC_CHANGED},
 uc: {pe.objects[idx].useCamera},
 l: {pe.objects[idx].layer},
-t: {pe.objects[idx].tag},
+t: '{pe.objects[idx].tag}',
 sm: {pe.objects[idx].smooth}"""
 
 def saveObjs(pe, path):
     file = open(path, "w")
     file.write("")
     file.close()
-    
     file = open(path, "a")
-    idx = 0
-    for i in pe.objClass:
-
-        if i == "Object":
-            file.write(writeObj(pe, idx, i))
-            
-        elif i == "Text":
-            file.write(writeObj(pe, idx, i))
-            
+    for idx, i in enumerate(pe.objClass):
+        file.write(writeObj(pe, idx, i))
         if idx != len(pe.objClass) - 1:
             file.write("\n!next!\n")
-        idx += 1
 
 def addObj(pe, path, newClass):
     file = open(path, "w")
     file.write("")
     file.close()
     
-    pe.objName.append(f"obj{len(pe.objName)+1}")
+    if newClass in pe.objClass:
+        name = f"{newClass}{pe.objClass.count(newClass) + 1}"
+    else:
+        name = f"{newClass}1"
+    
+    pe.objName.append(name)
     pe.objClass.append(newClass)
     
     if newClass == "Object":
-        pe.objects.append(Object(st.winApp, 0, 0, 0, 0, True, "None", "None", 0, 0, 0, False, False, 0, 0, "None", "None", 255, False, "None", {}, {}, (255, 255, 255), True, f"obj{len(pe.objName)+1}", 0, "obj"))
+        pe.objects.append(Object(st.winApp, 0, 0, 0, 0, True, "None", "None", 0, 0, 0, False, False, 0, 0, "None", "None", 255, False, "None", {}, {}, (255, 255, 255), True, name, 0, "obj"))
     elif newClass == "Text":
-        pe.objects.append(Text(st.winApp, 0, 0, "text", 32, "None", (0, 0, 0), 255, 0, True, False, False, "None", "None", 0, 0, 32, "left", False, "None", {}, {}, True, f"obj{len(pe.objName)+1}", 0, "obj", False))
+        pe.objects.append(Text(st.winApp, 0, 0, "text", 32, "None", (0, 0, 0), 255, 0, True, False, False, "None", "None", 0, 0, 32, "left", False, "None", {}, {}, True, name, 0, "obj", False))
+    else: return 0
     
     file = open(path, "a")
-    idx = 0
     
-    for i in pe.objClass:
-        if i == "Object":
-            file.write(writeObj(pe, idx, i))
-        
-        elif i == "Text":
-            file.write(writeObj(pe, idx, i))
-        
+    for idx, i in enumerate(pe.objClass):
+        file.write(writeObj(pe, idx, i))
         if idx != len(pe.objClass) - 1:
             file.write("\n!next!\n")
-        idx += 1
