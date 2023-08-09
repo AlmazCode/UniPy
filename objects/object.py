@@ -4,9 +4,8 @@ import settings as st
 import engineUI as eui
 
 class Object:
-    def __init__(self, surface: pygame.Surface, x: int, y: int, w: int, h: int, render: bool, image: str, bd: str, a: int, sw: int, sh: int, fx: bool, fy: bool, sx: int, sy: int, cx: str, cy: str, tsp: int, ufa: int, s: str, sc: str, scc: str, c: tuple, uc: bool, PARENT: str, l: int, t: str):
+    def __init__(self, surface: pygame.Surface, x: int, y: int, w: int, h: int, render: bool, image: str, bd: str, a: int, sw: int, sh: int, fx: bool, fy: bool, sx: int, sy: int, cx: str, cy: str, tsp: int, ufa: int, s: str, sc: dict, scc: dict, c: tuple, uc: bool, PARENT: str, l: int, t: str):
         self.win = surface
-        self.oldWinSize = self.win.get_size()
         
         self.PARENT = PARENT
         
@@ -18,28 +17,28 @@ class Object:
         self.flipX = fx
         self.flipY = fy
         
-        self._width = int(sw * self.factor)
-        self._height = int(sh * self.factor)
+        self._width = int(max(0, min(2048, sw)) * self.factor)
+        self._height = int(max(0, min(2048, sh)) * self.factor)
         
         self.wa = self._width
         self.ha = self._height
         
-        self._SW = sw
-        self._SH = sh
+        self._SW = max(0, min(2048, sw))
+        self._SH = max(0, min(2048, sh))
         self._sx = sx
         self._sy = sy
         
-        self.cx = cx
-        self.cy = cy
+        self.cx = str(cx)
+        self.cy = str(cy)
         
         self._color = list(c)
 
         self._pressed = False
         
         self.onPressed = None
-        self.onPressedContent = "()"
+        self.onPressedContent = ()
         self.onUnPressed = None
-        self.onUnPressedContent = "()"
+        self.onUnPressedContent = ()
         self.finger_id = -1
         
         self.frame = 1
@@ -49,9 +48,9 @@ class Object:
         self.topCollided = False
         self.bottomCollided = False
         self.onCollided = None
-        self.onCollidedContent = "()"
+        self.onCollidedContent = ()
         self.onUnCollided = None
-        self.onUnCollidedContent = "()"
+        self.onUnCollidedContent = ()
         
         self.render = render
         self.useCamera = uc
@@ -88,7 +87,7 @@ class Object:
         self.lastPos = self.rect.topleft
         
         # SCRIPT
-        self.script = s
+        self.script = str(s)
         self.S_LINKS = []
         
         self.S_CONTENT = sc
@@ -105,37 +104,6 @@ class Object:
         self.y = int(self.sy * self.factor) + yy
         self.width = int(self.SW * self.factor) + abs(ww)
         self.height = int(self.SH * self.factor) + abs(hh)
-    
-    def SSC(self):
-        for s in self.S_LINKS:
-            new = type(s).__name__ not in self.S_CONTENT
-            if new:
-                self.S_CONTENT[type(s).__name__] = {}
-                self.SC_CHANGED[type(s).__name__] = {}
-    
-            variables = [var for var in dir(s) if not callable(getattr(s, var)) and not var.startswith("__")]
-            if "this" in variables:
-                del variables[variables.index("this")]
-    
-            for j in variables[::-1]:
-                if new or j not in self.SC_CHANGED[type(s).__name__]:
-                    self.SC_CHANGED[type(s).__name__][j] = False
-                if not self.SC_CHANGED[type(s).__name__][j]:
-                    value = getattr(s, j)
-                    value_type = type(value).__name__
-                    if value_type in ["PATH", "OBJ"]:
-                        if value_type != "OBJ":
-                            if value.value in [i.split(".")[0] for i in pe.audios]:
-                                evaluated_value = f"pe.GetSound('{value.value}')"
-                            else:
-                                evaluated_value = f"pe.GetTexture('{value.value}')"
-                        else:
-                            evaluated_value = f"pe.GetObj('{value.value}')"
-                    elif value_type == "NoneType":
-                        evaluated_value = eval("{value}")
-                    else:
-                        evaluated_value = eval(f"{value_type}({value})")
-                    self.S_CONTENT[type(s).__name__][j] = [evaluated_value, value_type]
     
     @property
     def x(self):
@@ -193,22 +161,22 @@ class Object:
     
     @width.setter
     def width(self, value):
-    	self._width = value
-    	self.wa = value
-    	self.rect.width = value
+    	self._width = max(0, min(2048, value))
+    	self.wa = self.width
+    	self.rect.width = self.width
     	if self.CI != None:
-        	self.CI = pygame.transform.scale(self.image, (self._width, self._height))
+        	self.CI = pygame.transform.scale(self.image, (self.width, self.height))
         	self.CI = pygame.transform.rotate(self.CI, self._angle)
         	if self.color != [255, 255, 255]: self.CI.fill(self.color, special_flags=pygame.BLEND_RGB_MULT)
         	if self._transparent != 255: self.CI.set_alpha(self._transparent)
     
     @height.setter
     def height(self, value):
-    	self._height = value
-    	self.ha = value
-    	self.rect.height = value
+    	self._height = max(0, min(2048, value))
+    	self.ha = self.height
+    	self.rect.height = self.height
     	if self.CI != None:
-        	self.CI = pygame.transform.scale(self.image, (self._width, self._height))
+        	self.CI = pygame.transform.scale(self.image, (self.width, self.height))
         	self.CI = pygame.transform.rotate(self.CI, self._angle)
         	if self.color != [255, 255, 255]: self.CI.fill(self.color, special_flags=pygame.BLEND_RGB_MULT)
         	if self._transparent != 255: self.CI.set_alpha(self._transparent)
@@ -216,54 +184,50 @@ class Object:
     @sx.setter
     def sx(self, value):
         self._sx = value
-        self._x = int(self._sx * self.factor)
+        self._x = int(self.sx * self.factor)
         self.rect.x = self._x
     
     @sy.setter
     def sy(self, value):
         self._sy = value
-        self._y = int(self._sy * self.factor)
+        self._y = int(self.sy * self.factor)
         self.rect.y = self._y
     
     @SW.setter
     def SW(self, value):
-        self._SW = value
-        self.width = int(self._SW * self.factor)
+        self._SW = max(0, min(2048, value))
+        self.width = int(self.SW * self.factor)
         self.wa = self.width
     
     @SH.setter
     def SH(self, value):
-        self._SH = value
-        self.height = int(self._SH * self.factor)
+        self._SH = max(0, min(2048, value))
+        self.height = int(self.SH * self.factor)
         self.ha = self.height
     
     @image.setter
     def image(self, value):
-    	
+    	oldImg = self.image
+    	self._image = value
     	if value != None:
-    	    
-    	    if self.image == None and self.SW == 0 and self.SH == 0:
-    	        self._image = value
+    	    if oldImg == None and self.SW == 0 and self.SH == 0:
     	        self.CI = self._image
     	        self.SW, self.SH = self.CI.get_size()
     	    else:
-    	        self._image = value
-    	        self.CI = pygame.transform.scale(self._image, (self._width, self._height))
+    	        self.CI = pygame.transform.scale(self._image, (self.width, self.height))
     	        self.SW, self.SH = self.CI.get_size()
     	    
-    	    self.CI = pygame.transform.scale(self.image, (self._width, self._height))
-    	    self.CI = pygame.transform.rotate(self.CI, self._angle)
+    	    self.CI = pygame.transform.scale(self.image, (self.width, self.height))
+    	    self.CI = pygame.transform.rotate(self.CI, self.angle)
     	    self.wa, self.ha = self.CI.get_size()
     	    if self.color != [255, 255, 255]: self.CI.fill(self.color, special_flags=pygame.BLEND_RGB_MULT)
     	    if self._transparent != 255: self.CI.set_alpha(self._transparent)
-    	else:
-    	    self._image = value
     
     @color.setter
     def color(self, value):
         self._color = list(value)
         if self.CI != None:
-            self.CI = pygame.transform.scale(self.image, (self._width, self._height))
+            self.CI = pygame.transform.scale(self.image, (self.width, self.height))
             self.CI = pygame.transform.rotate(self.CI, self._angle)
             if self.color != [255, 255, 255]: self.CI.fill(self.color, special_flags=pygame.BLEND_RGB_MULT)
             if self._transparent != 255: self.CI.set_alpha(self._transparent)
@@ -277,7 +241,7 @@ class Object:
     def angle(self, value):
         self._angle = value
         if self.CI != None:
-            self.CI = pygame.transform.scale(self.image, (self._width, self._height))
+            self.CI = pygame.transform.scale(self.image, (self.width, self.height))
             self.CI = pygame.transform.rotate(self.CI, self._angle)
             self.wa, self.ha = self.CI.get_size()
             if self.color != [255, 255, 255]: self.CI.fill(self.color, special_flags=pygame.BLEND_RGB_MULT)
@@ -353,41 +317,28 @@ class Object:
     def setPosObject(self):
         if self.cx[:4] == "objX" and self.cx[4] == "(" and self.cx[-1] == ")":
             if self.cx[5:-1] in pe.objName:
-                self.rect.x = pe.GetObj(self.cx[5:-1]).x + self.sx * self.factor
-                self._x = self.rect.x
-        
+                self.x = pe.GetObj(self.cx[5:-1]).x + self.sx * self.factor
         elif self.cx[:5] == "objCX" and self.cx[5] == "(" and self.cx[-1] == ")":
             if self.cx[6:-1] in pe.objName:
-            	self.rect.x = pe.GetObj(self.cx[6:-1]).x + pe.GetObj(self.cx[6:-1]).width // 2 - self._width // 2
-            	self._x = self.rect.x
+            	self.x = pe.GetObj(self.cx[6:-1]).x + pe.GetObj(self.cx[6:-1]).width // 2 - self._width // 2
         
         if self.cy[:4] == "objY" and self.cy[4] == "(" and self.cy[-1] == ")":
             if self.cy[5:-1] in pe.objName:
-            	self.rect.y = pe.GetObj(self.cy[5:-1]).y + self.sy * self.factor
-            	self._y = self.rect.y
-        
+            	self.y = pe.GetObj(self.cy[5:-1]).y + self.sy * self.factor
         elif self.cy[:5] == "objCY" and self.cy[5] == "(" and self.cy[-1] == ")":
            if self.cy[6:-1] in pe.objName:
-            	self.rect.y = pe.GetObj(self.cy[6:-1]).y + pe.GetObj(self.cy[6:-1]).height // 2 - self._height // 2
-            	self._y = self.rect.y
+            	self.y = pe.GetObj(self.cy[6:-1]).y + pe.GetObj(self.cy[6:-1]).height // 2 - self._height // 2
     
     def setPos(self):
-        
         if self.cx == "right":
-            self.rect.x = self.win.get_width() - self.wa + self.sx
-            self._x = self.rect.x
-            
+            self.x = self.win.get_width() - self.wa + self.sx
         elif self.cx == "center":
-            self.rect.x = self.win.get_width() // 2 - self.wa // 2 + self.sx
-            self._x = self.rect.x
+            self.x = self.win.get_width() // 2 - self.wa // 2 + self.sx
             
         if self.cy == "bottom":
-            self.rect.y = self.win.get_height() - self.ha + self.sy
-            self._y = self.rect.y
-        
+            self.y = self.win.get_height() - self.ha + self.sy
         elif self.cy == "center":
-            self.rect.y = self.win.get_height() // 2 - self.ha // 2 + self.sy
-            self._y = self.rect.y
+            self.y = self.win.get_height() // 2 - self.ha // 2 + self.sy
     
     def addForce(self, force: float):
     	self.force += force
@@ -395,9 +346,8 @@ class Object:
     def CheckAnim(self):
         if self.anims:
             anim = self.anims[0]
-            idx = 0
     
-            for _a in anim:
+            for idx, _a in enumerate(anim):
                 if _a[0] in ["x", "y", "angle", "transparent", "width", "height"]:
                     attr_name = _a[0]
                     target_value = _a[1]
@@ -449,8 +399,6 @@ class Object:
                         if _a[3] is not None:
                             _a[3]()
                         self.anims[0].pop(idx)
-    
-                idx += 1
     
             if not self.anims[0]:
                 self.anims.pop(0)

@@ -127,7 +127,6 @@ class Conductor:
             end_row, end_col = tok.end
     
             if start_row != prev_end_row:
-                # Handle newline token separately
                 tokens.append(['\n', (255, 255, 255)])
                 
             if token_value == "(" and self.LT == tokenize.NAME:
@@ -211,7 +210,7 @@ class Conductor:
             self.compileText()
     
     def getIdxPos(self, idx):
-        y = 10
+        y = self.pinf.get_height() + 20
         idxx = 0
         for i in self.elemName:
             if idxx == idx:
@@ -292,7 +291,19 @@ class Conductor:
             y += size + 2
     
     def compileText(self):
-        y = 10
+        inf = self.thisPath
+        self.pinf = self.font.render(inf, 0, self.textColor)
+        if 10 + self.pinf.get_width() > self.surface.get_width():
+                while 1:
+                    self.pinf = self.font.render(inf, 0, self.textColor)
+                    if 10 + self.pinf.get_width() > self.surface.get_width():
+                        inf = inf[1:]
+                    else:
+                        inf = "..." + inf[3:]
+                        self.pinf = self.font.render(inf, 0, self.textColor)
+                        break
+        
+        y = self.pinf.get_height() + 20
         self.textes = []
         self.textesPos = []
         for idx, i in enumerate(self.elements):
@@ -324,7 +335,7 @@ class Conductor:
         mBT = pygame.mouse.get_pressed()
         
         if mBT[0] and not self.viewText:
-            y = 10
+            y = self.pinf.get_height() + 20
             c = 0
             for idx, i in enumerate(self.elements):
                 rect = pygame.Rect(10, y + self.oY, self.elemWidth, self.elemHeight)
@@ -354,7 +365,6 @@ class Conductor:
     
     def update(self, MP, MBP):
         if self.render:
-            
             if not self.viewText and self.scrolling and self.surface.get_rect(bottomleft=(self.x, self.y + self.surface.get_height())).collidepoint(MP) and MBP:
                 if self.lastMousePos:
                     scroll_amount = MP[1] - self.lastMousePos[1]
@@ -380,7 +390,7 @@ class Conductor:
                 txPos = txEmpty.get_rect(center=(self.surface.get_width() // 2, self.surface.get_height() // 2))
                 self.surface.blit(txEmpty, txPos)
             
-            y = 10
+            y = self.pinf.get_height() + 20
             if self.viewText:
             	pygame.draw.rect(self.surface, self.lineBgColor, (0 + self.tX, 0, self.MLS + 10, self.surface.get_height()))
             	for idx, img in enumerate(self.viewTextImage):
@@ -400,5 +410,8 @@ class Conductor:
 	                
 	                y += self.elemHeight + 10
 
-            if len(self.elements) > 0: self.lastY = y - self.elemHeight - 20
+            if len(self.elements) > 0: self.lastY = y - self.elemHeight - 30 - self.pinf.get_height()
+            if not self.viewText:
+                pygame.draw.rect(self.surface, (self.color), (0, 0, self.surface.get_width(), self.pinf.get_height() + 20))
+                self.surface.blit(self.pinf, (10, 10))
             self.win.blit(self.surface, (self.x, self.y))

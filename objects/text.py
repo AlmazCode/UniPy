@@ -14,14 +14,14 @@ class Text:
         self.x = int(sx * self.factor)
         self.y = int(sy * self.factor)
         
-        self._text = text.replace("\n", "\\n").replace("\t", "    ")
-        self._fontSize = int(sfs * self.factor)
-        self._sfs = sfs
-        self.fontPath = font if font != "None" else None
+        self._text = str(text).replace("\n", "\\n").replace("\t", "    ")
+        self._fontSize = int(max(0, min(2048, sfs)) * self.factor)
+        self._sfs = max(0, min(2048, sfs))
+        self.fontPath = font
         self.richText = rt
         
         try: self._font = pygame.font.Font(font, self._fontSize) if font != "None" else pygame.font.SysFont("Arial", self.fontSize)
-        except: self._font = pygame.font.Font(None, self._fontSize)
+        except: self._font = pygame.font.SysFont("Arial", self.fontSize)
         
         self._color = list(color)
         self.transparent = tsp
@@ -32,8 +32,8 @@ class Text:
         self._sx = sx
         self._sy = sy
         
-        self.cx = cx
-        self.cy = cy
+        self.cx = str(cx)
+        self.cy = str(cy)
         
         self.textCentering = tc if tc in ["left", "center", "right"] else "left"
         
@@ -46,7 +46,7 @@ class Text:
         self.smooth = sm
         
         # SCRIPT
-        self.script = s
+        self.script = str(s)
         self.S_LINKS = []
         
         self.S_CONTENT = sc
@@ -63,37 +63,6 @@ class Text:
         self.factor = min(self.win.get_width() / st.projectSize[0], self.win.get_height() / st.projectSize[1]) if self.win.get_width() > st.projectSize[0] and self.win.get_height() > st.projectSize[1] else min(self.win.get_width() / st.projectSize[0], self.win.get_height() / st.projectSize[1])
         
         self.fontSize = int(self.sfs * self.factor) + sfss
-    
-    def SSC(self):
-        for s in self.S_LINKS:
-            new = type(s).__name__ not in self.S_CONTENT
-            if new:
-                self.S_CONTENT[type(s).__name__] = {}
-                self.SC_CHANGED[type(s).__name__] = {}
-    
-            variables = [var for var in dir(s) if not callable(getattr(s, var)) and not var.startswith("__")]
-            if "this" in variables:
-                del variables[variables.index("this")]
-    
-            for j in variables[::-1]:
-                if new or j not in self.SC_CHANGED[type(s).__name__]:
-                    self.SC_CHANGED[type(s).__name__][j] = False
-                if not self.SC_CHANGED[type(s).__name__][j]:
-                    value = getattr(s, j)
-                    value_type = type(value).__name__
-                    if value_type in ["PATH", "OBJ"]:
-                        if value_type != "OBJ":
-                            if value.value in [i.split(".")[0] for i in pe.audios]:
-                                evaluated_value = f"pe.GetSound('{value.value}')"
-                            else:
-                                evaluated_value = f"pe.GetTexture('{value.value}')"
-                        else:
-                            evaluated_value = f"pe.GetObj('{value.value}')"
-                    elif value_type == "NoneType":
-                        evaluated_value = eval("{value}")
-                    else:
-                        evaluated_value = eval(f"{value_type}({value})")
-                    self.S_CONTENT[type(s).__name__][j] = [evaluated_value, value_type]
     
     def compileText(self):
         self.textes = []
@@ -198,11 +167,10 @@ class Text:
     
     @fontSize.setter
     def fontSize(self, value):
-        self._fontSize = value
-        self._font = pygame.font.Font(self.fontPath, self._fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
+        self._fontSize = max(0, min(2048, value))
+        self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
         
         self.compileText()
-        
         self.setPos()
         self.setPosObject()
     
@@ -213,17 +181,16 @@ class Text:
     
     @sfs.setter
     def sfs(self, value):
-        self._sfs = value
-        self._fontSize = int(self._sfs * self.factor)
-        self._font = pygame.font.Font(self.fontPath, self._fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
+        self._sfs = max(0, min(2048, value))
+        self._fontSize = int(self.sfs * self.factor)
+        self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
     
     @font.setter
     def font(self, value):
         self.fontPath = value
-        self._font = pygame.font.Font(value, self._fontSize)
+        self._font = pygame.font.Font(value, self.fontSize)
         
         self.compileText()
-        
         self.setPos()
         self.setPosObject()
     
@@ -267,9 +234,8 @@ class Text:
     def CheckAnim(self):
         if self.anims:
             anim = self.anims[0]
-            idx = 0
     
-            for _a in anim:
+            for idx, _a in enumerate(anim):
                 if _a[0] in ["x", "y", "angle", "transparent", "fontSize"]:
                     attr_name = _a[0]
                     target_value = _a[1]
@@ -322,8 +288,6 @@ class Text:
                             _a[3]()
                         self.anims[0].pop(idx)
     
-                idx += 1
-    
             if not self.anims[0]:
                 self.anims.pop(0)
     
@@ -341,40 +305,35 @@ class Text:
         
         if self.cx[:4] == "objX" and self.cx[4] == "(" and self.cx[-1] == ")":
             if self.cx[5:-1] in pe.objName:
-            	self.x = int(self._sx * self.factor)
-            	self.x = pe.GetObj(self.cx[5:-1]).x + self.x
-        
+            	self.x = pe.GetObj(self.cx[5:-1]).x + self.sx * self.factor
         elif self.cx[:5] == "objCX" and self.cx[5] == "(" and self.cx[-1] == ")":
             if self.cx[6:-1] in pe.objName:
-            	self.x = int(self._sx * self.factor)
             	self.x = pe.GetObj(self.cx[6:-1]).rect.centerx - wfc // 2
         
         if self.cy[:4] == "objY" and self.cy[4] == "(" and self.cy[-1] == ")":
             if self.cy[5:-1] in pe.objName:
-            	self.y = int(self._sy * self.factor)
-            	self.y = pe.GetObj(self.cy[5:-1]).y + self.y
-        
+            	self.y = pe.GetObj(self.cy[5:-1]).y + self.sy * self.factor
         elif self.cy[:5] == "objCY" and self.cy[5] == "(" and self.cy[-1] == ")":
             if self.cy[6:-1] in pe.objName:
-            	self.y = int(self._sy * self.factor)
             	self.y = pe.GetObj(self.cy[6:-1]).rect.centery - self.height // 2
     
     def setPos(self):
         wfc = self.textes[0].get_width()
         
-        if self.cx == "right": self.x = self.win.get_width() - wfc + self._sx
+        if self.cx == "right":
+            self.x = self.win.get_width() - wfc + self.sx
+        elif self.cx == "center":
+            self.x = self.win.get_width() // 2 - wfc // 2 + self.sx
             
-        elif self.cx == "center": self.x = self.win.get_width() // 2 - wfc // 2 + self._sx
-            
-        if self.cy == "bottom": self.y = self.win.get_height() - self.height + self._sy
-        
-        elif self.cy == "center": self.y = self.win.get_height() // 2 - self.height  // 2 + self._sy
+        if self.cy == "bottom":
+            self.y = self.win.get_height() - self.height + self.sy
+        elif self.cy == "center":
+            self.y = self.win.get_height() // 2 - self.height  // 2 + self.sy
     
     def update(self):
-        
         self.CheckAnim()
         
-        if self.render:
+        if self.render and self.fontSize != 0:
             y = 0
             firstText = self.textes[0]
 

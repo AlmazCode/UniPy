@@ -20,10 +20,11 @@ class Message:
         self.endTime = (0 - 255) / args.get("endTime", 30)
         self.state = 0
         self.ADP()
-        self.oX = args.get("oX", 0)
-        self.oY = args.get("oY", 0)
-        self.x = args.get("x", self.surface.get_width() // 2 - self.width // 2) + args.get("oX", 0)
-        self.y = args.get("y", self.surface.get_height() - self.height - 10) + args.get("oY", 0)
+        self.x = args.get("x", self.surface.get_width() // 2 - self.width // 2)
+        self.y = args.get("y", None)
+        if self.y is None:
+            self.y = self.surface.get_height() - self.height - 10
+        self.ifDel = False
     
     def ADP(self):
         self.message = self.OM
@@ -62,7 +63,7 @@ class Message:
             if self.stopTime == 0:
                 self.state = 2
             else: self.stopTime -= 1
-        if self.transparent <= 0 and self.state == 2: messages.remove(self)
+        if self.transparent <= 0 and self.state == 2: self.ifDel = True
         if self.state != 1: self.transparent += self.startTime if self.state == 0 else self.endTime
         self.image.set_alpha(self.transparent)
         self.surface.blit(self.image, (self.x, self.y))

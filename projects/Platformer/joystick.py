@@ -9,8 +9,8 @@ author: almazcode; #discord
 
 class joystick:
     def __init__(self):
-        self.handlerBg = up.OBJ()  # Background object for the joystick handler
-        self.player = up.OBJ()  # Object to be controlled by the joystick
+        self.handlerBg = ""
+        self.player = ""
         
         self._ih1p = False  # Flag indicating if the joystick is pressed
         self.zone = 100  # Area to which the joystick can be moved
@@ -25,6 +25,8 @@ class joystick:
         """
         Initialize the joystick.
         """
+        self.handlerBg = up.GetObj(self.handlerBg)
+        self.player = up.GetObj(self.player)
         self.this.rect.center = self.handlerBg.rect.center
         self.this.onPressed = self.h1p
         self.this.onUnPressed = self.h1p

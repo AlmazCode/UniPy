@@ -3,7 +3,7 @@ from UniPy import (
 	SetBgColor,
 	SaveVariable,
 	LoadVariable,
-	consoleLog
+	log
 )
 
 tx = GetObj("coins")
@@ -19,16 +19,16 @@ price = 100
 def Start():
     global money, CC, price
     
-    consoleLog(f"Привет, это лог!")
-    
     SetBgColor((70, 70, 70))
     
     money = LoadVariable("moneys")
     CC = LoadVariable("CC", 1)
     price = LoadVariable("price", price)
     tx.text = f"{int(money)}"
-    txCC.text = f"{str(CC)[0:3]} за клик"
-    txPrice.text = f"Улучшить\\n{price}\\nкоинов"
+    g = str(CC).split(".", 1)
+    if len(g) == 1: g.append("0")
+    txCC.text = f"{g[0]}.{g[1][0]} за клик"
+    txPrice.text = f"Улучшить\n{price}\nкоинов"
 
 def addMoney(state: bool):
     global money
@@ -46,15 +46,17 @@ def updateClicks():
 
 	if money >= price:
 		money -= price
-		price = int(price * 1.5)
+		price = int(price * 1.2)
 		CC *= 1.2
 		
 		SaveVariable("CC", CC, "float")
 		SaveVariable("price", price, "int")
 		
 		tx.text = f"{int(money)}"
-		txCC.text = f"{str(CC)[0:3]} за клик"
-		txPrice.text = f"Улучшить\\n{price}\\nкоинов"
+		g = str(CC).split(".", 1)
+		if len(g) == 1: g.append("0")
+		txCC.text = f"{g[0]}.{g[1][0]} за клик"
+		txPrice.text = f"Улучшить\n{price}\nкоинов"
 
 bt.onPressed = addMoney
 bt.onPressedContent = "(True)"

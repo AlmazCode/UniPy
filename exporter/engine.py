@@ -88,7 +88,7 @@ def loadObjectScriptLinks(one = False):
     for obj in pe.objects[n:]:
         if obj.script != "None":
             err = False
-            scripts = [i.strip() for i in obj.script.split(",")]
+            scripts = [i.strip().split(".")[-1] for i in obj.script.split(",")]
             
             ss = [i for i in obj.S_CONTENT]
             for s in ss:
@@ -106,23 +106,17 @@ def loadObjectScriptLinks(one = False):
                     else: ...
                 except Exception as e:
                     continue
-                    
-            obj.SSC()
             
-            idx = 0
-            for ojj in scripts:
-                if ojj in mn:
+            for idx, ojj in enumerate(scripts):
+                if ojj in mn and ojj in obj.S_CONTENT:
                     try: _v = [var for var in dir(obj.S_LINKS[idx]) if not callable(getattr(obj.S_LINKS[idx], var)) and not var.startswith("__")]
                     except: continue
-                    if "this" in _v: del _v[_v.index("this")]
-
+                    if "this" in _v: _v.remove("this")
                     for jjj in _v:
-                        vv = obj.S_CONTENT[ojj][jjj][0]
-                        vvt = obj.S_CONTENT[ojj][jjj][1]
-                        if vvt in ["PATH", "OBJ"]: vv = eval(vv)
-                        
-                        exec(f"obj.S_LINKS[{idx}].{jjj} = vv")
-                idx += 1
+                        if jjj in obj.S_CONTENT[ojj] and obj.SC_CHANGED[ojj][jjj]:
+                            vv = obj.S_CONTENT[ojj][jjj][0]
+                            vvt = obj.S_CONTENT[ojj][jjj][1]
+                            exec(f"obj.S_LINKS[{idx}].{jjj} = vv")
 
 def loadOBJScriptLinks(idx):
     obj = pe.objects[idx]
@@ -154,6 +148,7 @@ def startApp():
     pe.OON = pe.objName.copy()
     pe.OWS = []
     pe.Camera.target = None
+    pe.Camera.x, pe.Camera.y = 0, 0
     
     MHFS = []
     st.MHFU = []

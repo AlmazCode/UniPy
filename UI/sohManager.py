@@ -50,26 +50,26 @@ class SOHManager:
                         self.elem_name[idx] = self.elem_name[idx][:-4] + "..."
                         break
         
-        self.ce = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
-        self.cpe = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
+        self.ce = pygame.Surface((self.elem_width, self.elem_height))
+        self.cpe = pygame.Surface((self.elem_width, self.elem_height))
         
         self.bgSurf = pygame.Surface(self.surface.get_size())
         self.bgSurf.fill((1, 1, 1))
         self.bgSurf.set_colorkey((1, 1, 1))
         pygame.draw.rect(self.bgSurf, self.color, (0, 0, *self.surface.get_size()), self.bg_fill_size, self.bg_border_radius)
         
-        for elem, pelem in zip(self.ce, self.cpe):
-            elem.fill((1, 1, 1))
-            elem.set_colorkey((1, 1, 1))
-            pelem.fill((1, 1, 1))
-            pelem.set_colorkey((1, 1, 1))
+        self.ce.fill((1, 1, 1))
+        self.ce.set_colorkey((1, 1, 1))
+        self.cpe.fill((1, 1, 1))
+        self.cpe.set_colorkey((1, 1, 1))
             
-            pygame.draw.rect(elem, self.elem_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
-            pygame.draw.rect(pelem, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
+        pygame.draw.rect(self.ce, self.elem_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
+        pygame.draw.rect(self.cpe, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
     
     def press(self, mPos):
         y = 10
         c = 0
+                    
         for idx, i in enumerate(self.elements):
             rect = pygame.Rect(self.x + 10, y + self.oY, self.elem_width, self.elem_height)
     
@@ -80,7 +80,7 @@ class SOHManager:
                     self.elem_idx = -1
                 else:
                     self.elem_idx = idx
-                    self.last_elem = idx
+                    self.ename = i
                 break
             y += self.elem_height + 10
     
@@ -89,7 +89,6 @@ class SOHManager:
     
     def update(self, MP, MBP):
         if self.render:
-            
             if self.scrolling and self.surface.get_rect(bottomleft=(self.x, self.y + self.surface.get_height())).collidepoint(MP) and MBP:
                 if self.lastMousePos:
                     scroll_amount = MP[1] - self.lastMousePos[1]
@@ -102,13 +101,11 @@ class SOHManager:
             self.surface.fill((1, 1, 1))
             self.surface.blit(self.bgSurf, (0, 0))
             y = 10
-            for idx, i in enumerate(self.elements):
-               rect = pygame.Rect(10, y + self.oY, self.elem_width, self.elem_height)
-               if rect.y // 2 + rect.height // 2 < self.surface.get_height() and rect.y + rect.height > 0:
-                   self.surface.blit(self.ce[idx] if idx != self.elem_idx else self.cpe[idx], (10, y + self.oY))
-                   tx = self.font.render(i, 0, self.text_color)
-                   txPos = tx.get_rect(center=(0, y + self.elem_height // 2))
-                   self.surface.blit(tx, (20, txPos[1] + self.oY))
-               y += self.elem_height + 10
+            for idx, i in enumerate(self.elem_name):
+                self.surface.blit(self.ce if idx != self.elem_idx else self.cpe, (10, y + self.oY))
+                tx = self.font.render(i, 0, self.text_color)
+                txPos = tx.get_rect(center=(0, y + self.elem_height // 2))
+                self.surface.blit(tx, (20, txPos[1] + self.oY))
+                y += self.elem_height + 10
             if len(self.elements) > 0: self.lastY = y - self.elem_height - 20
             self.win.blit(self.surface, (self.x, self.y))

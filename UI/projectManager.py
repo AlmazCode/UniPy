@@ -54,20 +54,18 @@ class ProjectManager:
                         self.elem_name[idx] = self.elem_name[idx][:-3] + "..."
                         break
 
-        self.ce = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
-        self.cpe = [pygame.Surface((self.elem_width, self.elem_height))] * len(self.elements)
+        self.ce = pygame.Surface((self.elem_width, self.elem_height))
+        self.cpe = pygame.Surface((self.elem_width, self.elem_height))
 
-        for elem in self.ce:
-            elem.fill((1, 1, 1))
-            elem.set_colorkey((1, 1, 1))
+        self.ce.fill((1, 1, 1))
+        self.ce.set_colorkey((1, 1, 1))
 
-            pygame.draw.rect(elem, self.elem_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
+        pygame.draw.rect(self.ce, self.elem_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
 
-        for elem in self.cpe:
-            elem.fill((1, 1, 1))
-            elem.set_colorkey((1, 1, 1))
+        self.cpe.fill((1, 1, 1))
+        self.cpe.set_colorkey((1, 1, 1))
 
-            pygame.draw.rect(elem, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
+        pygame.draw.rect(self.cpe, self.elem_selected_color, (0, 0, self.elem_width, self.elem_height), self.fill_size, self.border_radius)
 
     def press(self, mPos):
         c = 0
@@ -107,7 +105,7 @@ class ProjectManager:
             for idx, i in enumerate(self.elem_name):
                 rect = pygame.Rect(0, y + self.oY, self.elem_width, self.elem_height)
                 if rect.y + rect.height < self.surface.get_height() and rect.y + rect.height > 0:
-                    self.surface.blit(self.ce[idx] if idx != self.elem_idx else self.cpe[idx], (0, y + self.oY))
+                    self.surface.blit(self.ce if idx != self.elem_idx else self.cpe, (0, y + self.oY))
                     tx = self.font.render(i, 0, self.text_color)
                     txPos = tx.get_rect(center=(self.win.get_width() // 2 - self.elem_width // 2 + tx.get_width() // 2 + 10, y + self.elem_height // 2))
                     self.surface.blit(tx, (10, txPos[1] + self.oY))
