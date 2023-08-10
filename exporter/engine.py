@@ -18,7 +18,7 @@ def loadResourses():
     
     for i in st.files:
     	
-    	if os.path.splitext(i)[-1] in pe._imgTypes and i != st.EIK:
+    	if i.split(".")[-1] in pe._imgTypes and i != st.EIK:
     		txs = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
     		pe.texturesTSP[i] = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
     		
@@ -36,7 +36,7 @@ def loadResourses():
     		pe.textures[i].blit(txs, (0, 0))
     		pe.textures[i].set_colorkey(replacement_color)
     	
-    	elif os.path.splitext(i)[-1] in pe._audioTypes: pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+    	elif i.split(".")[-1] in pe._audioTypes: pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
 
 
 def startLogo():
@@ -117,25 +117,6 @@ def loadObjectScriptLinks(one = False):
                             vv = obj.S_CONTENT[ojj][jjj][0]
                             vvt = obj.S_CONTENT[ojj][jjj][1]
                             exec(f"obj.S_LINKS[{idx}].{jjj} = vv")
-
-def loadOBJScriptLinks(idx):
-    obj = pe.objects[idx]
-    idxs = [pe.OWS.index(i) for i in obj.S_LINKS]
-    obj.S_LINKS = []
-    
-    if obj.script != "None":
-        scripts = [i.strip() for i in obj.script.split(",")]
-        mn = [i.__name__.split(".")[-1] for i in st.modules]
-
-        for ojj in scripts:
-            
-            try:
-                if ojj in mn:
-                    pe.OWS.append(eval(f"st.modules[mn.index(\"{ojj}\")].{ojj}()"))
-                    pe.OWS[-1].this = obj
-                    obj.S_LINKS.append(pe.OWS[-1])
-            except: pass
-        obj.SSC()
                 
 # start app
 def startApp():

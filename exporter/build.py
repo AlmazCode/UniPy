@@ -63,13 +63,15 @@ def createProject(create_path, path_to_project, project_name, program_name, prog
     df = False
     
     if os.path.exists(f"{create_path}{pt.s}{project_name}"):
-        with open(f"{create_path}{pt.s}{project_name}{pt.s}engine{pt.s}settings.py", "r") as f:
-            inf = f.read()
-            g = re.findall(r'version = "([^"]*)"', inf)
-            lpv = g[0] if g else None
-        if os.path.exists(f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}$data"):
-            shutil.move(f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}$data", f"exporter{pt.s}")
-            df = True
+        try:
+            with open(f"{create_path}{pt.s}{project_name}{pt.s}engine{pt.s}settings.py", "r") as f:
+                inf = f.read()
+                g = re.findall(r'version = "([^"]*)"', inf)
+                lpv = g[0] if g else None
+            if os.path.exists(f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}$data"):
+                shutil.move(f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}$data", f"exporter{pt.s}")
+                df = True
+        except: pass
         shutil.rmtree(f"{create_path}{pt.s}{project_name}")
     
     os.makedirs(f"{create_path}{pt.s}{project_name}")
@@ -82,13 +84,18 @@ def createProject(create_path, path_to_project, project_name, program_name, prog
             if os.path.isdir(f"{path_to_project}{pt.s}{file}"):
                 shutil.copytree(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}{file}")
             else:
-                shutil.copy(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res")
+                try:
+                    shutil.copy(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res")
+                except: pass
     
     shutil.copy(f"assets{pt.s}engineIcon.png", f"{create_path}{pt.s}{project_name}{pt.s}engine")
     
     for file in FTE:
-        shutil.copy(file, f"{create_path}{pt.s}{project_name}{pt.s}engine")
-    shutil.copy(f"exporter{pt.s}main.py", f"{create_path}{pt.s}{project_name}")
+        try:
+            shutil.copy(file, f"{create_path}{pt.s}{project_name}{pt.s}engine")
+        except: pass
+    try: shutil.copy(f"exporter{pt.s}main.py", f"{create_path}{pt.s}{project_name}")
+    except: pass
     
     for file in os.listdir(f"{create_path}{pt.s}{project_name}{pt.s}engine"):
         
