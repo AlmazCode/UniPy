@@ -43,8 +43,8 @@ while 1:
             st.uiBS = st.width // 8 if st.height > 720 else st.width // 18
             if pt._platform != "Android":
                 st.uiBS = st.uiBS // 3.5
-            st.uiIW = st.width // 2
-            st.uiIH = st.uiIW // 4 if st.height >= st.width else st.uiIW // 10
+            st.uiIW = st.width // 2 if st.height > st.width else st.width // 4
+            st.uiIH = st.uiIW // 4
             for bt in eui.button.BUTTONS:
                 bt.width = st.uiBS
                 bt.height = st.uiBS
@@ -79,7 +79,7 @@ while 1:
                 for obj in pe.objects: obj.setPosObject()
             eui.uiEngineImages["ENGINE_ICON"] = pygame.transform.smoothscale(eui.uiEngineImages["engineIcon"], (int(st.width / 7.5) if st.width <= 720 else st.width // 15, int(st.width / 7.5) if st.width <= 720 else st.width // 15))
             st.uiTFont = pygame.font.Font(st.uiFont, st.height // 20  if st.height > 720 else st.height // 10)
-            st.uiTSFont = pygame.font.Font(st.uiFont, st.height // 30 if st.height > 720 else st.height // 15)
+            st.uiTSFont = pygame.font.Font(st.uiFont, st.height // 32 if st.height > 720 else st.height // 18)
             eui.PAC.surface = pygame.Surface((st.width, st.height))
             eui.PAC.ADP()
             eui.PAC.ADPIMG()
@@ -94,10 +94,10 @@ while 1:
             eui.fileConductor.y = 20 + st.uiBS
             eui.SOHM.surface = pygame.Surface((st.width // 1.3, st.height - 20))
             eui.SOHM.normalize()
-            eui.SNOP.surface = pygame.Surface((st.width // 1.5, st.height // 2))
+            eui.SNOP.surface = pygame.Surface((st.width // 1.5 if st.width < st.height else st.width // 3, st.height // 2))
             eui.SNOP.normalize()
-            eui.SNOP.y = eui.btShowPanel.rect.y - st.height // 2 - 10
-            eui.SNOP.x = eui.btShowPanel.rect.right - st.width // 1.5
+            eui.SNOP.y = eui.btShowPanel.rect.y - eui.SNOP.surface.get_height() - 10
+            eui.SNOP.x = eui.btShowPanel.rect.right - eui.SNOP.surface.get_width()
             eui.PM.surface = pygame.Surface((eui.PM.win.get_width()//1.5, eui.PM.win.get_height()))
             eui.PM.normalize()
             eui.PM.x = st.width // 2 - (st.width // 1.5) // 2
@@ -438,7 +438,15 @@ while 1:
         scrollPos = st.MP
     
     draws[st.drawingLayer]()
+    
+    messages_to_remove = []
     for msg in eui.message.messages:
-        msg.update()
+        if msg.ifDel:
+            messages_to_remove.append(msg)
+        else:
+            msg.update()
+    for msg in messages_to_remove:
+        eui.message.messages.remove(msg)
+        
     try: pygame.display.flip()
     except: pass

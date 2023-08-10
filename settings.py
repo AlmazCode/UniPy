@@ -4,7 +4,7 @@ import pather as pt
 pygame.init()
 
 # enigine settings
-version = "alpha 0.1.1"
+version = "alpha 0.1.2"
 # engine development started on 02/19/2023
 
 # create engine display

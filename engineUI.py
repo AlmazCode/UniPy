@@ -994,9 +994,8 @@ def setScriptVarValue(script, type, var, value, OBJ = None):
     obj = pe.objects[idx]
     
    # try:
-    value = eval(f"{type}('{value}')")
+    value = eval(f"{type}({value})")
     _val = str(value)
-            
     g = loadOBJScriptLinks(idx)
     if script.split(".")[-1] in obj.SC_CHANGED:
         if g[script][var] == value:
