@@ -104,21 +104,17 @@ def openProject(idx):
     	for msg in message.messages: msg.update()
     	pygame.display.flip()
     	
-    	if os.path.splitext(i)[-1] in [".png", ".jpg", ".jpeg"]:
+    	if i.split(".")[-1] in pe._imgTypes:
     		txs = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
-    		f = False
-    		pe.texturesTSP[i] = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
+    		pe.texturesTSP[i] = txs.copy()
     		
     		pe.textures[i] = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert()
     		
     		replacement_color = (1, 1, 1)
-    		
-    		# Replace transparent pixels with the replacement color
     		for x in range(txs.get_width()):
     		    for y in range(txs.get_height()):
     		        if list(txs.get_at((x, y)))[-1] == 0:
     		            txs.set_at((x, y), replacement_color)
-    		            f = True
     		
     		pe.textures[i] = pygame.Surface(txs.get_size()).convert()
     		pe.textures[i].blit(txs, (0, 0))
@@ -288,6 +284,7 @@ def deleteFolderInPM():
     shutil.rmtree(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")
     
     st.projects = os.listdir(PATH)
+    PM.elem_idx = -1
     PM.elements = st.projects
     PM.normalize()
 
@@ -337,7 +334,7 @@ def closeObjectInfo():
 def deleteObj():
     global OPIE
     
-    idx = pe.objName.index(SOHM.ename)
+    idx = pe.objName.index(pe.objName[SOHM.elem_idx])
     pe.objName.pop(idx)
     pe.objClass.pop(idx)
     pe.objects.pop(idx)
@@ -369,10 +366,10 @@ def startCRfromMoveFile():
     btDoneCR.render = True
     btDoneCR.func = moveFileInPAC
     
-    btCancelCR.func = closeCRfromPAC
+    btCancelCR.func = closeCRfromMoveFile
     fileConductor.content = ""
     fileConductor.func = None
-    fileConductor.startPath = f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}"
+    fileConductor.startPath = PAC.startPath
     fileConductor.setPath()
 
 def setExportProjectPath():
@@ -398,6 +395,8 @@ def moveFileInPAC():
     PAC.setPath(fileConductor.thisPath)
     startPACR()
     btCancelCR.func = closeCR
+    fileConductor.startPath = pt._defaultPath
+    fileConductor.setPath()
 
 def startCRfromImportProject():
     st.drawingLayer = 2
@@ -415,14 +414,17 @@ def importProjects():
     if fileConductor.elem_idx != -1:
         if os.path.isdir(f"{fileConductor.thisPath}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}"):
             try: shutil.copytree(f"{fileConductor.thisPath}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}", f"{PATH}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}")
-            except: ...
+            except Exception as e:
+                createMessage(st.win, f"Failed to import the project \"{fileConductor.elements[fileConductor.elem_idx]}\"", stopTime = 120)
     else:
         fls = os.listdir(fileConductor.thisPath)
         for f in fls:
             if os.path.isdir(f"{fileConductor.thisPath}{pt.s}{f}"):
                 try:
                     shutil.copytree(f"{fileConductor.thisPath}{pt.s}{f}", f"{PATH}{pt.s}{f}")
-                except: ...
+                except Exception as e:
+                    createMessage(st.win, f"Failed to import the project \"{f}\"", stopTime = 120)
+
     st.drawingLayer = -1
     st.projects = os.listdir(PATH)
     PM.elements = st.projects
@@ -432,6 +434,12 @@ def importProjects():
 def closeCRfromPAC():
     st.drawingLayer = 3
     btCancelCR.func = closeCR
+
+def closeCRfromMoveFile():
+    st.drawingLayer = 3
+    btCancelCR.func = closeCR
+    fileConductor.startPath = pt._defaultPath
+    fileConductor.setPath()
 
 def closeCRfromExportProject():
     st.drawingLayer = 4
@@ -607,10 +615,13 @@ def objectDown():
 
 # copy object
 def copyObject():
-    idx = pe.objName.index(SOHM.ename)
+    idx = pe.objName.index(pe.objName.index(SOHM.elem_idx))
     
     pe.objects.append(copy.copy(pe.objects[idx]))
-    pe.objName.append(f"{pe.objName[idx]} (1)")
+    of = 1
+    while f"{pe.objName[idx]} ({of})" in pe.objName:
+        of += 1
+    pe.objName.append(f"{pe.objName[idx]} ({of})")
     pe.objClass.append(pe.objClass[idx])
     SOHM.elements = pe.objName[:]
     SOHM.elem_idx = len(SOHM.elements)-1
@@ -945,18 +956,20 @@ def changeObjProperty(key, content = None):
         pe.objects[idx].useCamera = ObjUseCamera.active
     
     elif key == "script":
-        l = [i.strip() for i in ObjScript.text.split(",")]
-        c = 0
-        for i in l:
-            if l.count(i) > 1:
-                ObjScript.text = pe.objects[idx].script
-                c += 1
-                break
-        
-        if c == 0:
-            pe.objects[idx].script = ObjScript.text
-                    	
-            setObjProperty(st.lastSelectionObject, False)
+        if ObjScript.text != "":
+            l = [i.strip() for i in ObjScript.text.split(",")]
+            c = 0
+            for i in l:
+                if l.count(i) > 1:
+                    ObjScript.text = pe.objects[idx].script
+                    c += 1
+                    break
+            
+            if c == 0:
+                pe.objects[idx].script = ObjScript.text
+                setObjProperty(st.lastSelectionObject, False)
+        else:
+            ObjScript.text = pe.objects[idx].script
     
     elif key == "font":
         st.drawingLayer = 0
@@ -1257,7 +1270,7 @@ ObjSmooth = toggleButton.ToggleButton(st.win, "smooth", changeObjProperty, borde
 # buttons for object inspector
 ObjLoadImage = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "set", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startCR, fontPath = st.uiFont, key = "image", image = uiEngineImages["load"], color = st.uiBC, pressedColor = st.uiBPC)
 
-ObjBD = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "select", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["body"], color = st.uiBC, pressedColor = st.uiBPC, key = "bodyType", content = f"(['None', 'dynamic', 'static'], self, 'bodyType')")
+ObjBD = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "select", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["body"], color = st.uiBC, pressedColor = st.uiBPC, key = "bodyType", content = f"(['None', 'dynamic', 'static', 'kinematic'], self, 'bodyType')")
 
 ObjTC = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "select", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["point"], color = st.uiBC, pressedColor = st.uiBPC, key = "textCentering", content = f"(['left', 'center', 'right'], self, 'textCentering')")
 
@@ -1312,8 +1325,6 @@ def AEPME():
 def drawUI():
     
     if st.lastSelectionObject == None:
-        btStartApp.update()
-        btShowPanel.update()
         
         if not st.isCreateObject:
             btToCP.update()
@@ -1353,13 +1364,15 @@ def drawUI():
         
         if st.isSelector:
         	ObjSW.update(st.MP, st.MBP)
+        	
+    if st.lastSelectionObject == None:
+        btStartApp.update()
+        btShowPanel.update()
 
 def drawApp():
     global error
     
     st.winApp.fill(st.GBGC)
-    btStartApp.update()
-    btSCC.update()
         
     for script in st.MHFU:
     	try:
@@ -1391,6 +1404,9 @@ def drawApp():
     if error:
         appError = st.uiTSFont.render(f"[Error]", 0, (255, 0, 0))
         st.win.blit(appError, (appFps.get_width() + 30, st.height - appFps.get_height() // 2 - (st.height - st.AppHeight) // 2))
+        
+    btStartApp.update()
+    btSCC.update()
 
 # draw conductor
 def drawCR():

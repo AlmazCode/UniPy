@@ -4,11 +4,11 @@ import pather as pt
 pygame.init()
 
 # enigine settings
-version = "alpha 0.1.2"
+version = "alpha 0.1.3"
 # engine development started on 02/19/2023
 
 # create engine display
-win = pygame.display.set_mode((0, 0), pygame.RESIZABLE, vsync = 1)
+win = pygame.display.set_mode((0, 0) if pt._platform == "Android" else (1280, 720), pygame.RESIZABLE, vsync = 1)
 clock = pygame.time.Clock()
 pygame.display.set_caption(f"UniPy {version}")
 

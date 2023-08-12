@@ -1,7 +1,5 @@
 import pygame
 
-pygame.init()
-
 class Input:
     def __init__(self, surface, func, **args):
         INPUTS.append(self)
@@ -114,7 +112,6 @@ class Input:
         except:
             pass
 
-    # функция, которая добавляет символ в текст
     def press(self, key):
 
         if self.render and self.mode == 1:
@@ -125,11 +122,9 @@ class Input:
                 if self.func is not None:
                     eval(f"self.func{self.content}")
 
-            # добавление символа в текст
             if key != "BS" and key != "ETR" and self.mode == 1 and len(self.text) < self.max_chars:
                 self.text += key
 
-                # проверка не выходит ли текст за границы input, если да, то текст будет сдвинут влево на один символ
                 try:
                     while True:
                         tx = self.font.render(self.text[self.text_end:-1] + self.text[-1], 1, (255, 255, 255))
@@ -143,13 +138,11 @@ class Input:
                 except:
                     pass
 
-            # удаление последнего символа в тексте
             elif key == "BS" and self.mode == 1 and self.text != '':
                 self.text = self.text[:-1]
                 if self.text_end > 0:
                     self.text_end -= 1
 
-                # проверка не выходит ли текст за границы input, если да, то текст будет сдвинут влево на один символ
                 try:
                     while True:
                         tx = self.font.render(self.text[self.text_end:-1] + self.text[-1], 1, (255, 255, 255))
@@ -163,7 +156,6 @@ class Input:
                 except:
                     pass
 
-    # функция, обновляющая весь input и взаимодействие с ним
     def update(self):
         if self.render:
             if self.mode == 1:
@@ -183,11 +175,8 @@ class Input:
             self.draw()
 
     def draw(self):
-
-        # отрисовка input в зависимости от переменной [mode]
         self.surface.blit(self.cdw if self.mode == 0 else self.cpw, self.rect)
 
-        # если текст в input пустой
         if self.text == '':
             no_text = self.font.render(self.no_text, 1, self.text_color)
             no_text.set_alpha(128)
@@ -195,15 +184,13 @@ class Input:
 
             self.surface.blit(no_text, text_win)
 
-        # иначе
         else:
-            text = self.font.render(self.text[self.text_end:], 0, self.text_color)
+            text = self.font.render(str(self.text)[self.text_end:], 0, self.text_color)
             text_win = text.get_rect(center=((self.rect.x + text.get_width() // 2) + 5, self.rect.centery))
 
             self.surface.blit(text, text_win)
             rect = pygame.Rect(text.get_width(), 0, 0, 0)
 
-            # отрисовка курсора
             if self.mode == 1 and self.direction == -1 and rect.x + 20 < self.rect.width:
                 pygame.draw.rect(self.surface, self.cursor_color, (self.rect.x + text.get_width() + 10, self.rect.centery - self.font_size // 2, self.font_size // 12, self.font_size))
 

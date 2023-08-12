@@ -36,7 +36,6 @@ class ProjectManager:
             y += self.elem_height + 10
 
     def normalize(self):
-        self.elem_idx = -1
         self.elem_name = self.elements[:]
         self.elem_width = self.surface.get_width()
         self.elem_height = self.surface.get_height() // 10 if self.win.get_width() <= self.win.get_height() else self.surface.get_height() // 8

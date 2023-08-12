@@ -3,6 +3,7 @@ import settings as st
 import os, inspect, collections
 import pather as pt
 from objects import camera
+from modules import Math
 
 OON = []
 objClass = []
@@ -184,20 +185,6 @@ def DelObj(obj):
         file = caller_frame.f_code.co_filename
         line = caller_frame.f_lineno
         Error(file, line, f"\"{obj}\" is not defined", "warning")
-
-def distance(obj1, obj2):
-    caller_frame = inspect.currentframe().f_back
-    file = caller_frame.f_code.co_filename
-    line = caller_frame.f_lineno
-
-    if obj1 not in objects:
-        Error(file, line, f"\"{obj1}\" is not defined", "warning")
-        return -1
-    if obj2 not in objects:
-        Error(file, line, f"\"{obj2}\" is not defined", "warning")
-        return -1
-
-    return ((obj2.rect.x - obj1.rect.x) ** 2 + (obj2.rect.y - obj1.rect.y) ** 2) ** (0.5)
     
 def GetObjectsWithTag(name: str):
     return [obj for obj in objects if obj.tag == name]
