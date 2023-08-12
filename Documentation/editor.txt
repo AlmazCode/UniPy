@@ -1,0 +1,24 @@
+The engine's editor is a user-friendly tool with several key features. It's recommended to thoroughly review the documentation, particularly the sections covering "object_docum" and "text_docum," before utilizing the editor.
+
+A significant tool within the editor is the set of specialized functions for component inputs. For instance, the "x" component can utilize the `centerx()` function, which provides the center position of the object along the "x" axis on the screen. Here's a list of available functions for component inputs:
+
+- `centerx()` - returns the center of the "x" axis.
+- `centery()` - returns the center of the "y" axis.
+- `top()` - returns the top point's "y" axis coordinate on the screen.
+- `left()` - returns the left point's "x" axis coordinate on the screen.
+- `bottom()` - returns the bottom point's "y" axis coordinate on the screen.
+- `right()` - returns the right point's "x" axis coordinate on the screen.
+- `ww()` - returns the screen width.
+- `wh()` - returns the screen height.
+
+Leveraging these functions streamlines component input operations, enhancing convenience and efficiency.
+
+ASSETS:
+
+To import assets into your project, utilize a dedicated function within the engine editor. Click on the fourth button from the right to access the engine explorer, which displays all assets in your project. To import a file as an asset, tap the "+" button, opening your phone's explorer to select the desired file.
+
+By following this approach, you can effortlessly import and manage assets within your project, benefiting from the editor's user-friendly interface that enhances efficiency and time savings.
+
+SCRIPTS:
+
+In UniPy, the placement of scripts carries significance and adheres to specific rules. All scripts must possess the `.py` extension and reside in the root folder of the project.

@@ -110,19 +110,12 @@ class Text:
                     s += subr
                     surf.blit(tx, (x, 0))
                     x += tx.get_width()
-                
-                if self.angle != 0 and s != "":
-                    surf = pygame.transform.rotate(surf, self.angle)
-                surf = pygame.transform.flip(surf, self.flipX, self.flipY)
                 surf.set_colorkey((1, 1, 1))
                 self.textes.append(surf)
         
         else:
             for i in self.text.split("\\n"):
                 tx = self.font.render(i, self.smooth, self.color)
-                if self.angle != 0 and i != "":
-                    tx = pygame.transform.rotate(tx, self.angle)
-                tx = pygame.transform.flip(tx, self.flipX, self.flipY)
                 self.textes.append(tx)
         
         self.width = max(sublist.get_width() for sublist in self.textes)
@@ -336,10 +329,13 @@ class Text:
         if self.render and self.fontSize != 0:
             y = 0
             firstText = self.textes[0]
-
             for text in self.textes:
-
                 endText = text
+                
+                if self.angle != 0:
+                    endText = pygame.transform.rotate(self.endText, self.angle)
+                if self.flipX or self.flipY:
+                    endText = pygame.transform.flip(self.endText, self.flipX, self.flipY)
                 
                 if self.transparent != 255: endText.set_alpha(self.transparent)
                 if self.textCentering == "center" and y != 0: pos = endText.get_rect(center = (self.x + firstText.get_width() // 2, 0))

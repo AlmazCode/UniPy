@@ -1,0 +1,39 @@
+In UniPy, you can write two types of scripts: general scripts controlling the entire program, and scripts tailored to manage individual objects. Let's create a script that assigns a random color to an object upon startup. Here's how it's done:
+
+```python
+import random
+
+class random_color:
+    def __init__(self):
+        ...
+
+    def Start(self):
+        self.this.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+```
+
+In this script, we import the required module and establish a class. Note that the class name must match the script name, or an error will occur. In the `__init__` method, we leave it blank, while in the `Start` method, we assign the color. `self.this` stores a reference to the object the script is applied to.
+
+For the script to control our object, we need to go to the object in the editor and specify the script name in the "script" component. If your script lies in a folder (e.g., "scripts"), use dots in the path: folder.script_name.
+
+Let's address another scenario: moving an object along the x-axis by 's' pixels every 'n' seconds. The implementation is as follows:
+
+```python
+class move:
+    def __init__(self):
+        self.n = 1
+        self.s = 12
+        self._tick = 0
+
+    def Start(self):
+        self.n *= 60
+
+    def Update(self):
+        self._tick += 1
+        if self._tick == self.n:
+            self.this.x += self.s
+            self._tick = 0
+```
+
+In this script, `__init__` sets variables, `Start` converts seconds to frames, and `Update` handles the logic. When attaching this script to an object, the inspector provides input fields for `n` and `s` values. Remember, variables starting with "_" cannot be edited in the inspector.
+
+By understanding these script structures, you can efficiently control object behavior and create customized interactions within your game.

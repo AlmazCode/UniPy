@@ -1,0 +1,68 @@
+An object in UniPy is a fundamental element that can be placed within the game scene and interact with other objects. To streamline object manipulation in the editor, several editable components have been introduced.
+
+The following are the object components that can be modified in the editor:
+
+- `x`: X-axis coordinate determining the object's position on the game scene.
+- `y`: Y-axis coordinate determining the object's position on the game scene.
+- `width`: Width of the object.
+- `height`: Height of the object.
+- `angle`: Angle at which the object is displayed on the screen.
+- `bodyType`: Type of body for the object: None (regular object), dynamic (physics body), static (static body, e.g., wall), kinematic (as None, but dynamic objects can check for collisions with it.).
+- `transparent`: Transparency level of the object.
+- `render`: If False, the object won't be displayed on the screen.
+- `flipX`: If True, the object will be horizontally flipped.
+- `flipY`: If True, the object will be vertically flipped.
+- `image`: Image to be displayed on the object.
+- `cx`: Centering along the X-axis in specific positions: right, left, center, objX(ObjectName), objCX(objectName).
+- `cy`: Centering along the Y-axis in specific positions: top, bottom, center, objY(ObjectName), objCY(objectName).
+- `useFullAlpha`: If True, the object image will use full alpha channels.
+- `script`: Stores scripts managing the object (comma-separated).
+- `color`: Color of the object.
+- `layer`: Drawing layer for the object.
+- `tag`: Object tag for filtering or searching.
+- `useCamera`: If True, the object will be displayed from the camera.
+
+For objects with a dynamic body type, use `rect.x` and `rect.y` for position modifications in code, rather than `x` and `y`, to ensure proper physics handling. (This applies only to code)
+
+Example:
+
+```python
+def Update():
+    player.rect.x += 1
+```
+
+Remember, object centering only occurs at startup. To re-center based on parameters, call functions in the code: `setPos` (right, left, top, bottom, centerx, centery) and `setPosObject` (objX, objY).
+
+UniPy provides events for objects, like object press and release. These events can be handled with corresponding functions.
+
+- `onPressed`: Called when object is pressed, arguments in `pressedContent`.
+- `onUnPressed`: Called when object is released, arguments in `UnPressedContent`.
+
+Example:
+
+```python
+def resize(amount):
+    player.width += amount
+    player.height += amount
+
+player.onPressed = resize
+player.onPressedContent = (10)
+player.onUnPressed = resize
+player.onUnPressedContent = (-10)
+```
+
+Use `pressed()` to check if the object was pressed in the current frame. For instance:
+
+```python
+def Update():
+    if player.pressed():
+        player.x += 1
+```
+
+This method enables efficient object control and interactive UI elements.
+
+The object has `onCollided` and `onUnCollided` functions, similar to `onPressed` and `onUnPressed`.
+
+Also, `leftCollided`, `rightCollided`, `topCollided`, and `bottomCollided` variables store collision information. `collidedObject` stores the object involved in the collision.
+
+Understanding these parameters allows efficient object control and customization in the game. Modify parameters through code or leverage the editor for streamlined object creation and faster game development.

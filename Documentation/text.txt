@@ -1,0 +1,36 @@
+A text object in UniPy serves as an element placed within the game scene, capable of interacting with other objects.
+
+The parameters available for editing in a text object encompass:
+
+- `x`: X-coordinate defining the text object's position on the game scene.
+- `y`: Y-coordinate defining the text object's position on the game scene.
+- `text`: Text to be displayed on the object.
+- `fontSize`: Font size of the text.
+- `font`: Font used for displaying the text.
+- `color`: Text color.
+- `transparent`: Transparency of the text.
+- `angle`: Angle at which the object is displayed on the screen.
+- `textCentering`: Text centering on specific sides: left, centerx, right.
+- `render`: If False, the object won't be displayed on the screen.
+- `flipX`: If True, the object will be horizontally flipped.
+- `flipY`: If True, the object will be vertically flipped.
+- `richText`: If True, the text will support a multi-color system.
+- `cx`: Object centering along the X-axis on specific sides.
+- `cy`: Object centering along the Y-axis on specific sides.
+- `script`: Stores scripts managing the object (comma-separated).
+- `layer`: Drawing layer for the object.
+- `tag`: Object tag for filtering or searching.
+- `useCamera`: If True, the object will be displayed from the camera.
+- `smooth`: If True, text will be displayed anti-aliased.
+
+Moreover, the object will only be centered during startup. To re-center based on parameters, a function must be called in the code. Two functions are available: `setPos` (right, left, top, bottom, centerx, centery) and `setPosObject` (objX, objY).
+
+The engine's support for multiline text is notable. To split text into multiple lines, use the newline character "\n". For example, to display the text "Hello, world!" and "This is a multiline text." on separate lines, input it as "Hello, world!\nThis is a multiline text."
+
+This engine also supports a multi-color system using tags. Start a tag with a dollar sign "$" followed by the text color in RGB format within parentheses. For instance:
+```
+$(255, 0, 0)Hello, $(0, 255, 255)World!
+```
+In this example, "Hello" appears in red, and "World!" in turquoise.
+
+Comprehending these parameters enables efficient control of text objects and customization of their appearance and behavior within the game. Parameters can be edited manually or via the editor, streamlining the process of creating game objects and overall game development.

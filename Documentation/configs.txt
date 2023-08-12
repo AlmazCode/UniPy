@@ -1,0 +1,23 @@
+This guide is aimed at those who want to customize the color palette of the engine. It explains how to create your own configuration file and integrate it into the engine.
+
+The `settings.py` file contains all the interface settings for the engine. Here's a step-by-step process for creating a custom configuration:
+
+1. Create a file with the ".txt" extension and save it in the "configs" folder.
+2. As an example, let's say you want to change the engine's text color. In `settings.py`, the text color is represented by the `uiTColor` variable. In your configuration file, you would write something like:
+   ```python
+   uiTColor = (255, 0, 0, 0)
+   ```
+   For instance, a configuration file named "red.txt" might look like this:
+   ```python
+   uiBgColor = (255, 0, 0)
+   uiTColor = (200, 0, 0)
+   ```
+   This alteration would change the text and background color of the engine to various shades of red.
+
+To implement the configuration changes in the engine:
+
+1. Open `settings.py` and locate the `config_name` variable at the end.
+2. Specify the name of your configuration file (you can list multiple files, separated by commas) within the `config_name` variable.
+3. Set the `load_config` variable to `True`.
+
+Upon running the engine, you'll observe the applied changes according to your configuration.
