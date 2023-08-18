@@ -35,7 +35,7 @@ def addMoney(state: bool):
     
     money += CC if state else 0
     tx.text = f"{int(money)}"
-    SaveVariable("moneys", money, "int")
+    SaveVariable("moneys", money, int)
     bt.anims = []
     txCC.anims = []
     bt.AddAnim([4, 4], f"width = {266 if state else 255}; height = {266 if state else 255}", [], [], True)
@@ -49,8 +49,9 @@ def updateClicks():
 		price = int(price * 1.2)
 		CC *= 1.2
 		
-		SaveVariable("CC", CC, "float")
-		SaveVariable("price", price, "int")
+		SaveVariable("moneys", money, int)
+		SaveVariable("CC", CC, float)
+		SaveVariable("price", price, int)
 		
 		tx.text = f"{int(money)}"
 		g = str(CC).split(".", 1)

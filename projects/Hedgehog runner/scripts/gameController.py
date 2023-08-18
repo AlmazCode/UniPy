@@ -40,7 +40,7 @@ def onLogDeleted():
     if score > bestScore:
         bestScore = score
         bestScoreTx.text = f"Best Score: {bestScore}"
-        up.SaveVariable("bestScore", bestScore, "int")
+        up.SaveVariable("bestScore", bestScore, int)
         
     thisScore.text = f"Score: {score}"
     

@@ -178,7 +178,7 @@ class Input:
         self.surface.blit(self.cdw if self.mode == 0 else self.cpw, self.rect)
 
         if self.text == '':
-            no_text = self.font.render(self.no_text, 1, self.text_color)
+            no_text = self.font.render(self.no_text, 0, self.text_color)
             no_text.set_alpha(128)
             text_win = no_text.get_rect(center=((self.rect.x + no_text.get_width() // 2) + 5, self.rect.centery))
 

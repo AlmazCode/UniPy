@@ -9,7 +9,7 @@ OON = []
 objClass = []
 objName = []
 objects = []
-fingersPos = [[-99, -99]] * 10
+fingersPos = [None] * 10
 OWS = []
 Camera = camera.Camera(st.AppWidth, st.AppHeight)
 
@@ -20,34 +20,16 @@ textures = {}
 texturesTSP = {}
 audios = {}
 
-_varTypes = [
-                "str",
-                "int",
-                "float",
-                "bool",
-                "list",
-                "tuple",
-                "dict",
-                "set"
-                    ]
-_audioTypes = [
-                    "mp3",
-                    "ogg",
-                    "wav",
-                    "flac"
-                        ]
-_imgTypes = [
-                "png",
-                "jpg",
-                "jpeg"
-                    ]
+_audioTypes = ["mp3", "ogg", "wav", "flac"]
+_imgTypes = ["png", "jpg", "jpeg", "bmp"]
+_bodyTypes = ["None", "dynamic", "static", "kinematic"]
+_mathSybs = {*"01234567890+-*/.()^ "}
 
 def Error(file, line, error, _type):
     if _type == "error": eui.error = True
     
     eui._console.Log(f"UniPy {_type.capitalize()}: in script \"{file.split(pt.s)[-1]}\": in line [{line}]\n{error}", _type)
 
-# возвращает ссылку на объект
 def GetObj(name: str):
     
     if name in objName:
@@ -59,7 +41,7 @@ def GetObj(name: str):
         line = caller_frame.f_lineno
         Error(file, line, f"\"{name}\" is not defined", "error")
 
-# задает цвет фона программы
+
 def SetBgColor(color: tuple):
     if all(isinstance(c, int) and 0 <= c <= 255 for c in color):
         st.GBGC = color
@@ -69,33 +51,25 @@ def SetBgColor(color: tuple):
         line = caller_frame.f_lineno
         Error(file, line, f"\"{color}\" invalid color", "warning")
 
-# сохраняет значение переменной по ключу
-def SaveVariable(keyName: str, variable, _type):
-    if not os.path.exists(f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data"):
-        os.makedirs(f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data")
-    
-    if _type in _varTypes:
-        with open(f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data{pt.s}{keyName}.txt", "w") as f:
-            f.write(f"{_type}: {variable}")
-    else:
-        caller_frame = inspect.currentframe().f_back
-        file = caller_frame.f_code.co_filename
-        line = caller_frame.f_lineno
-        Error(file, line, f"\"{_type}\" invalid variable type", "warning")
+def SaveVariable(key: str, value: any, _type: any):
+    path = f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(f"{path}{pt.s}{key}.txt", "w") as f:
+        f.write(f"{_type.__name__}: {value}")
 
-# загружает значение переменной по ключу
-def LoadVariable(keyName: str, SERT = 0):
+def LoadVariable(key: str, notFoundValue = 0):
     try:
-	    with open(f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data{pt.s}{keyName}.txt", "r") as f:
+	    with open(f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data{pt.s}{key}.txt", "r") as f:
 	        get = f.read().split(":", 1)
-	        return eval(f"{_varTypes[_varTypes.index(get[0])]}({get[1][1:]})")
-                
+	        value = f"{get[0].strip()}({get[1].strip()})"
+	        return eval(value)
     except:
         caller_frame = inspect.currentframe().f_back
         file = caller_frame.f_code.co_filename
         line = caller_frame.f_lineno
-        Error(file, line, f"\"{keyName}\" is not defined", "warning")
-    return SERT
+        Error(file, line, f"\"{key}\" is not defined", "warning")
+        return notFoundValue
 
 def GetModule(name: str):
     for module in st.modules:
@@ -141,7 +115,6 @@ def GetTexture(name: str, fullAlpha: bool = False):
     txs = [i.split(pt.s)[-1].rsplit(".", 1)[0] for i in textures] if not fullAlpha else [i for i in texturesTSP]
     
     if name in txs:
-
         return textures[ftxs[txs.index(name)]] if not fullAlpha else texturesTSP[ftxs[txs.index(name)]]
     else:
         caller_frame = inspect.currentframe().f_back

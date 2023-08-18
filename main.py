@@ -14,21 +14,28 @@ draws = {
 }
 
 scrollPos = None
-
-if st.not_found_cfgs:
-    eui.createMessage(st.win, f"Ooh, configs:\n[{', '.join(st.not_found_cfgs)}]\nwere not found", stopTime = 120)
     
-# engine loop
 while 1:
-    
-    st.dt = st.clock.tick(st.fps)
+    pe.deltaTime = st.clock.tick(st.fps) / 1000.0
     st.win.fill(st.uiBgColor)
     st.MP = pygame.mouse.get_pos()
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
-            
+        elif event.type == pygame.ACTIVEEVENT:
+            if event.gain != 0:
+                if st.projectIdx != -1:
+                    st.files, st.dirs = eui.loadAllFilesFromDir(f"{eui.PATH}{pt.s}{st.projects[st.projectIdx]}")
+                    for i in st.files:
+                    	if i.split(".")[-1] in pe._imgTypes and i not in pe.textures:
+                    	    pe.textures[i], pe.texturesTSP[i] = eui.loadImage(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+                    	
+                    	elif i.split(".")[-1] in pe._audioTypes and i not in pe.audios:
+                    	    pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+                    if st.drawingLayer == 3 and not eui.PAC.viewText:
+                    	eui.PAC.reOpenPath()
+                    	
         elif event.type == pygame.VIDEORESIZE:
             if pt._platform == "Android":
                 st.win = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE, vsync = 1)
@@ -40,9 +47,9 @@ while 1:
             pe.Camera.width = st.AppWidth
             pe.Camera.height = st.AppHeight
             pe.wWidth, pe.wHeight = st.AppWidth, st.AppHeight
-            st.uiBS = st.width // 8 if st.height > 720 else st.width // 18
+            st.uiBS = st.width // 8 if st.height > st.width else st.width // 18
             if pt._platform != "Android":
-                st.uiBS = st.uiBS // 3.5
+                st.uiBS = st.uiBS // 1.3
             st.uiIW = st.width // 2 if st.height > st.width else st.width // 4
             st.uiIH = st.uiIW // 4
             for bt in eui.button.BUTTONS:
@@ -77,9 +84,9 @@ while 1:
                     obj.adapt()
                 for obj in pe.objects: obj.setPos()
                 for obj in pe.objects: obj.setPosObject()
-            eui.uiEngineImages["ENGINE_ICON"] = pygame.transform.smoothscale(eui.uiEngineImages["engineIcon"], (int(st.width / 7.5) if st.width <= 720 else st.width // 15, int(st.width / 7.5) if st.width <= 720 else st.width // 15))
-            st.uiTFont = pygame.font.Font(st.uiFont, st.height // 20  if st.height > 720 else st.height // 10)
-            st.uiTSFont = pygame.font.Font(st.uiFont, st.height // 32 if st.height > 720 else st.height // 18)
+            eui.uiEngineImages["ENGINE_ICON"] = pygame.transform.smoothscale(eui.uiEngineImages["engineIcon"], (int(st.width / 7.5) if st.width < st.height else st.width // 15, int(st.width / 7.5) if st.width < st.height else st.width // 15))
+            st.uiTFont = pygame.font.Font(st.uiFont, st.height // 20  if st.height > st.width else st.height // 10)
+            st.uiTSFont = pygame.font.Font(st.uiFont, st.height // 32 if st.height > st.width else st.height // 18)
             eui.PAC.surface = pygame.Surface((st.width, st.height))
             eui.PAC.ADP()
             eui.PAC.ADPIMG()
@@ -93,6 +100,7 @@ while 1:
             eui.fileConductor.compileText()
             eui.fileConductor.y = 20 + st.uiBS
             eui.SOHM.surface = pygame.Surface((st.width // 1.3, st.height - 20))
+            eui.SOHM.elemsHDiv = 15 if st.width < st.height else 10
             eui.SOHM.normalize()
             eui.SNOP.surface = pygame.Surface((st.width // 1.5 if st.width < st.height else st.width // 3, st.height // 2))
             eui.SNOP.normalize()
@@ -170,7 +178,7 @@ while 1:
 	        			eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
         	
         elif event.type == pygame.FINGERUP:
-            pe.fingersPos[event.finger_id] = [-99, -99]
+            pe.fingersPos[event.finger_id] = None
             
             if st.drawingLayer == 1:
                 for i in pe.objects[::-1]:
@@ -245,7 +253,7 @@ while 1:
         elif event.type == pygame.MOUSEBUTTONUP:
             st.MBP = pygame.mouse.get_pressed()[0]
             if pt._platform != "Android" and st.drawingLayer == 1:
-                pe.fingersPos[0] = (-99, -99)
+                pe.fingersPos[0] = None
                 for i in pe.objects[::-1]:
                     try:
                         if hasattr(i, "onUnPressed"): i.HasUnPressed(0)
@@ -338,7 +346,7 @@ while 1:
             
             if st.drawingLayer == 2 and st.MBP:
                 eui.fileConductor.Press()
-            if st.drawingLayer == 3 and st.MBP:
+            elif st.drawingLayer == 3 and st.MBP:
                 eui.PAC.Press()
             if st.drawingLayer == 0 and st.MBP and st.lastSelectionObject == None and not st.isCreateObject:
                 eui.SOHM.press(event.pos)

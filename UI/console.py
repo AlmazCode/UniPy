@@ -21,6 +21,8 @@ class Console:
         self.lastMousePos = None
         self.scrolling = args.get("scrolling", True)
         self.scrollSpeed = args.get("scrollSpeed", 1)
+        self.maxW = 0
+        self.lastY = 0
         self.ADP()
 	
     def ADP(self):
@@ -52,17 +54,24 @@ class Console:
     def update(self, MP, MBP):
         if self.render:
             
-            if MBP:
-                if self.scrolling and self.lastMousePos:
+            if self.scrolling and self.surface.get_rect(bottomleft=(self.x, self.y + self.surface.get_height())).collidepoint(MP) and MBP:
+                if self.lastMousePos:
                     scroll_amount = (MP[0] - self.lastMousePos[0], MP[1] - self.lastMousePos[1])
                     self.tX += scroll_amount[0] * self.scrollSpeed
                     self.tY += scroll_amount[1] * self.scrollSpeed
                     if self.tX > 0: self.tX = 0
                     if self.tY > 0: self.tY = 0
+                    if abs(self.tY) > abs(self.lastY - self.surface.get_height()):
+                        self.tY = -abs(self.lastY - self.surface.get_height()) - 10
+                    if abs(self.tX) > abs(self.maxW - self.surface.get_width()):
+                        self.tX = -abs(self.maxW - self.surface.get_width()) - 10
                 self.lastMousePos = MP
             
             self.surface.fill(self.bg_color)
             y = 10
+            c = 0
+            self.maxW = 0
+            lns = 0
             for tx, tp in zip(self.textes, self.textes_type):
                 color, img = self.logs_type[tp]
                 self.surface.blit(img, (10 + self.tX, y + self.tY))
@@ -70,6 +79,15 @@ class Console:
                     text = self.font.render(s, 0, color)
                     self.surface.blit(text, (img.get_width() + 30 + self.tX, y + self.tY + img.get_height() // 2 - text.get_height() // 2))
                     y += text.get_height()
+                    lns += img.get_height()
+                    c += 1
+                    if text.get_width() > self.maxW:
+                        self.maxW = text.get_width()
                 y += self.font_size
             pygame.draw.rect(self.surface, self.stroke_color, (0, 0, self.width, self.height), 5)
+            if self.textes:
+                self.maxW += img.get_width() + 30
+                if self.maxW < self.surface.get_width():
+                    self.maxW = self.surface.get_width()
+                self.lastY = y if y > self.surface.get_height() else self.surface.get_height()
             self.win.blit(self.surface, (self.x, self.y))
