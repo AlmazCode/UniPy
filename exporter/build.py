@@ -43,13 +43,15 @@ def createProject(create_path, path_to_project, project_name, program_name, prog
     for file in files:
         if file not in ["__pycache__", "project_info.txt", "$data"]:
             if os.path.isdir(f"{path_to_project}{pt.s}{file}"):
-                shutil.copytree(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}{file}")
+                try: shutil.copytree(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res{pt.s}{file}")
+                except: pass
             else:
                 try:
                     shutil.copy(f"{path_to_project}{pt.s}{file}", f"{create_path}{pt.s}{project_name}{pt.s}res")
                 except: pass
     
-    shutil.copy(f"assets{pt.s}engineIcon.png", f"{create_path}{pt.s}{project_name}{pt.s}engine")
+    try: shutil.copy(f"assets{pt.s}engineIcon.png", f"{create_path}{pt.s}{project_name}{pt.s}engine")
+    except: pass
     
     for file in FTE:
         try:
@@ -123,7 +125,7 @@ def createProject(create_path, path_to_project, project_name, program_name, prog
     
     upf = open(f"{create_path}{pt.s}{project_name}{pt.s}engine{pt.s}UniPy.py", "r")
     inf = upf.read()
-    inf = inf.replace("def appQuit(): eui.returnToEditor()", "def appQuit(): eui.exit()", 1)
+    inf = inf.replace("def appQuit(): eui.returnToEditor()", "def appQuit(): exit()", 1)
     inf = inf.replace('.{pt.s}projects{pt.s}{st.projects[st.projectIdx]}', 'res')
     inf = inf.replace("{eui.PATH}{pt.s}{st.projects[st.projectIdx]}", "res")
     inf = inf.replace('eui._console.Log(text, "log", file.split("{pt.s}")[-1], line)', "")

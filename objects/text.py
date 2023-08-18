@@ -161,7 +161,8 @@ class Text:
     @fontSize.setter
     def fontSize(self, value):
         self._fontSize = max(0, min(2048, value))
-        self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
+        try: self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != "None" else pygame.font.SysFont("Arial", self.fontSize)
+        except: self._font = pygame.font.SysFont("Arial", self.fontSize)
         
         self.compileText()
         self.setPos()
@@ -176,12 +177,14 @@ class Text:
     def sfs(self, value):
         self._sfs = max(0, min(2048, value))
         self._fontSize = int(self.sfs * self.factor)
-        self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != None else pygame.font.SysFont("Arial", self.fontSize)
+        try: self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != "None" else pygame.font.SysFont("Arial", self.fontSize)
+        except: self._font = pygame.font.SysFont("Arial", self.fontSize)
     
     @font.setter
     def font(self, value):
         self.fontPath = value
-        self._font = pygame.font.Font(value, self.fontSize)
+        try: self._font = pygame.font.Font(self.fontPath, self.fontSize) if self.fontPath != "None" else pygame.font.SysFont("Arial", self.fontSize)
+        except: self._font = pygame.font.SysFont("Arial", self.fontSize)
         
         self.compileText()
         self.setPos()

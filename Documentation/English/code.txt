@@ -1,0 +1,68 @@
+UniPy is a versatile tool that caters to users of various skill levels. While it's accessible to everyone, having a basic understanding of Python can enhance your experience and minimize errors in your code.
+
+To initiate object-related tasks in your game, begin by importing the `GetObj` function from the UniPy module. Use the following code snippet:
+
+```python
+from UniPy import GetObj
+```
+
+This function permits you to obtain a reference to an object based on its name. For instance, if you wish to reference the "player" object, use the following code:
+
+```python
+obj = GetObj("player")
+```
+
+Now, the variable `obj` contains a reference to the "player" object.
+
+UniPy offers two functions, `Start` and `Update`, which can be valuable for your work. The `Start` function executes once at program launch, serving purposes such as object setup or data loading from files. To define `Start`, structure it like this:
+
+```python
+def Start():
+    # Your code here
+```
+
+The `Update` function, on the other hand, is called every frame of the game and is useful for tasks like updating object positions or checking for collisions. To define `Update`, follow this structure:
+
+```python
+def Update():
+    # Your code here
+```
+
+Here's an example code snippet illustrating how to use UniPy to manipulate game objects:
+
+```python
+from UniPy import GetObj
+import random
+
+player = GetObj("player")
+playerSpeed = 5
+
+def Start():
+    player.x = random.randint(0, 200)
+    
+def Update():
+    player.x += playerSpeed
+```
+
+This code showcases the usage of UniPy for object manipulation in a game. First, we import the `GetObj` function to access game objects by name. We then acquire a reference to the "player" object and store it in the `player` variable.
+
+To control object behavior, grasp their properties and methods. In the provided code, the `playerSpeed` variable determines the speed of the "player" object's movement.
+
+To initialize objects' initial state, utilize the `Start` function. It sets the initial position of the "player" object on the game field. In this example, we use `random.randint` to set a random x-coordinate between 0 and 200.
+
+To update object states each frame, employ the `Update` function. Here, the x-coordinate of the "player" object is updated based on the `playerSpeed` value.
+
+In addition to the above, UniPy offers several functions that facilitate various tasks. For instance:
+- `onFingerDown`, `onFingerUp`, `onFingerMotion`: Respond to touch events. Return (_id, pos)
+- `onWindowResized`: Handle window resizing. Return: (newWindowSize)
+- `onKeyPressed`, `onKeyDown`, `onKeyUp`: Manage keyboard input. Return: (key)
+- `appQuit`, `reloadApp`: Terminate or reload the program.
+- `log(content)`: Print text for debugging.
+- `SetCamera(name)`: Set the camera to follow a specific object.
+- `GetObjectsWithTag(name)`: Retrieve a list of objects with a certain tag.
+- `GetModule(name)`, `GetTexture`, `GetSound`: Access scripts, images, and sounds.
+- `CloneObject(obj)`, `DelObj`: Clone or delete objects.
+- `SetBgColor(color: tuple)`: Set background color.
+- `SaveVariable(key, value, valueType)`, `LoadVariable(key, notFoundValue = 0)`: Store and retrieve variable values.
+
+To use these functions, ensure you import them from the UniPy module.

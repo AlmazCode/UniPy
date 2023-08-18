@@ -9,10 +9,9 @@ import engine.pather as pt
 eui.loadResourses()
 eui.startApp()
 
-# engine loop
 while 1:
     
-    st.clock.tick(st.fps)
+    pe.deltaTime = st.clock.tick(st.fps) / 1000.0
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -99,7 +98,7 @@ while 1:
         elif event.type == pygame.MOUSEBUTTONUP:
             st.MBP = pygame.mouse.get_pressed()[0]
             if pt._platform != "Android":
-                pe.fingersPos[0] = (-99, -99)
+                pe.fingersPos[0] = None
                 for i in pe.objects[::-1]:
                     try:
                         if hasattr(i, "onUnPressed"): i.HasUnPressed(0)
@@ -146,7 +145,7 @@ while 1:
 	        	except Exception as e: ...
         	
         elif event.type == pygame.FINGERUP:
-            pe.fingersPos[event.finger_id] = [-99, -99]
+            pe.fingersPos[event.finger_id] = None
             for i in pe.objects[::-1]:
                 try:
                     if hasattr(i, "onUnPressed"): i.HasUnPressed(event.finger_id)

@@ -1,0 +1,28 @@
+In UniPy, you can easily create animations for objects, such as changing their position, size, and other properties, without the need for extensive code.
+
+The Object class allows you to animate properties like x, y, width, height, angle, transparent, and color. Similarly, for the Text class, you can animate properties such as x, y, angle, transparent, fontSize, and color.
+
+You can add animations to objects using code, as demonstrated in the following example:
+
+```python
+import UniPy as up
+
+obj = up.GetObj("circle")
+obj.AddAnim([5], "angle = 180", [None], [None], True)
+```
+
+In this code snippet, we retrieve an object and apply animation using the `AddAnim` function, which adds the animation to a queue.
+
+- The first argument specifies the animation speed. In this case, the object's angle will increase by 5 units per frame.
+- The second argument defines the animations themselves. Multiple animations can be combined, like so:
+
+```python
+obj.AddAnim([5, 10], "angle = 180; x = 200", [None, None])
+```
+
+These two animations will run concurrently.
+- The third argument indicates the function to execute once the animation ends (None: none).
+- The fourth argument specifies functions to execute during each animation iteration.
+- The fifth argument controls alignment. If your object was originally aligned to cx or cy, setting this to True will align the animation to x and y (default is False).
+
+As mentioned earlier, the `AddAnim` function adds animations to a queue, running sequentially from the first to the last. The object automatically initiates the next animation once the current one concludes.
