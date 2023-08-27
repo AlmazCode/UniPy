@@ -4,41 +4,32 @@ import settings as st
 import engineUI as eui
 
 class Object:
-    def __init__(self, surface: pygame.Surface, x: int, y: int, w: int, h: int, render: bool, image: str, bd: str, a: int, sw: int, sh: int, fx: bool, fy: bool, sx: int, sy: int, cx: str, cy: str, tsp: int, ufa: int, s: str, sc: dict, scc: dict, c: tuple, uc: bool, PARENT: str, l: int, t: str):
+    def __init__(self, surface: pygame.Surface, x: int, y: int, w: int, h: int, render: bool, image: str, bd: str, a: int, sw: int, sh: int, fx: bool, fy: bool, sx: int, sy: int, cx: str, cy: str, tsp: int, ufa: int, s: str, sc: dict, scc: dict, c: tuple, uc: bool, PARENT: str, l: int, t: str, m: int):
         self.win = surface
-        
         self.PARENT = PARENT
         
         self.factor = min(surface.get_width() / st.projectSize[0], surface.get_height() / st.projectSize[1]) if surface.get_width() > st.projectSize[0] and surface.get_height() > st.projectSize[1] else min(surface.get_width() / st.projectSize[0], surface.get_height() / st.projectSize[1])
         
         self._x = int(sx * self.factor)
         self._y = int(sy * self.factor)
-        
         self.flipX = fx
         self.flipY = fy
-        
         self._width = int(max(0, min(2048, sw)) * self.factor)
         self._height = int(max(0, min(2048, sh)) * self.factor)
-        
         self.wa = self._width
         self.ha = self._height
-        
         self._SW = max(0, min(2048, sw))
         self._SH = max(0, min(2048, sh))
         self._sx = sx
         self._sy = sy
-        
         self.cx = str(cx)
         self.cy = str(cy)
         
         self._color = list(c)
 
         self._pressed = False
-        
         self.onPressed = None
-        self.onPressedContent = ()
         self.onUnPressed = None
-        self.onUnPressedContent = ()
         self.finger_id = -1
         
         self.frame = 1
@@ -48,9 +39,7 @@ class Object:
         self.topCollided = False
         self.bottomCollided = False
         self.onCollided = None
-        self.onCollidedContent = ()
         self.onUnCollided = None
-        self.onUnCollidedContent = ()
         
         self.render = render
         self.useCamera = uc
@@ -75,16 +64,15 @@ class Object:
         self.tag = t
 	        
         # PHYSICS
-        self.gravity = 10
-        self.thisGravity = self.gravity
-        self.force = 0
-        self.lastTop = self.rect.top
-        self.lastPos = self.rect.topleft
+        self.velocity = pygame.math.Vector2()
+        self.mass = m
+        self.terminal_velocity = self.mass * pe.TERMINALVELOCITY
+        self.lastX = self.rect.x
+        self.lastY = self.rect.y
         
         # SCRIPT
         self.script = str(s)
         self.S_LINKS = []
-        
         self.S_CONTENT = sc
         self.SC_CHANGED = scc
         
@@ -262,23 +250,23 @@ class Object:
     
     def HasPressed(self, pos, id):
         r = pe.Camera.apply(self.rect) if self.useCamera else self.rect
-        if self.onPressed != None and r.collidepoint(pos) and self.render:
+        if r.collidepoint(pos) and self.render:
             self._pressed = True
             self.finger_id = id
-            
-            eval(f"self.onPressed{self.onPressedContent}")
-            
-            if self.onUnPressed == None:
+            if self.onUnPressed is None:
             	self._pressed = False
             	self.finger_id = -1
+            
+            if type(self.onPressed).__name__ in ["method", "function"]:
+                self.onPressed()
     
     def HasUnPressed(self, id):
         if self._pressed and self.render and id == self.finger_id:
             self._pressed = False
             self.finger_id = -1
             
-            if self.onUnPressed != None:
-                eval(f"self.onUnPressed{self.onUnPressedContent}")
+            if type(self.onUnPressed).__name__ in ["method", "function"]:
+                self.onUnPressed()
     
     def pressed(self):
         if self.pressed:
@@ -315,7 +303,7 @@ class Object:
             self.y = self.win.get_height() // 2 - self.ha // 2 + self.sy
     
     def addForce(self, force: float):
-    	self.force += force
+    	self.velocity.y = -force
     
     def CheckAnim(self):
         if self.anims:
@@ -377,92 +365,72 @@ class Object:
             if not self.anims[0]:
                 self.anims.pop(0)
     
+    def _collided(self, obj):
+        self.collidedObj = obj
+        if type(self.onCollided).__name__ in ["method", "function"]:
+            try:
+                self.onCollided()
+            except:
+                eui.error = True
+                tb = e.__traceback__
+                filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+                eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+    
+    def check_collision(self, direction):
+        if direction == "horizontal":
+            if self.lastX != self.rect.x and self.frame % 2 == 0:
+                self.rightCollided = False
+                self.leftCollided = False
+            for obj in pe.objects:
+                if obj != self and hasattr(obj, "bodyType") and obj.bodyType != "None" and obj.rect.colliderect(self.rect):
+                    self._collided(obj)
+                    if obj.bodyType not in ["kinematic", "dynamic"]:
+                        if self.velocity.x > 0:
+                            self.rect.right = obj.rect.left
+                            self.rightCollided = True
+                        if self.velocity.x < 0:
+                            self.rect.left = obj.rect.right
+                            self.leftCollided = True
+        elif direction == "vertical":
+            if self.lastY != self.rect.y and self.frame % 2 == 0:
+                self.bottomCollided = False
+                self.topCollided = False
+            for obj in pe.objects:
+                if obj != self and hasattr(obj, "bodyType") and obj.bodyType != "None" and obj.rect.colliderect(self.rect):
+                    self._collided(obj)
+                    if obj.bodyType not in ["kinematic", "dynamic"]:
+                        if self.velocity.y > 0:
+                            self.rect.bottom = obj.rect.top
+                            self.bottomCollided = True
+                        if self.velocity.y < 0:
+                            self.rect.top = obj.rect.bottom
+                            self.topCollided = True
+                        self.velocity.y = 0
+                
     def update(self):
         if self.bodyType == "dynamic":
-            c = 0
-            ico = False
-            rc = False
-            lc = False
-            tc = False
-            bc = False
-            
-            if self.gravity == 0 and self.thisGravity != 0:
-                self.thisGravity = 0
-            if self.force <= 0.5:
-                self.rect.y += self.thisGravity
-                self.thisGravity = min(64, self.thisGravity + self.thisGravity * 0.049)
-            else:
-                self.rect.y -= self.force
-                self.force /= 1.5
-                
-                if self.force <= 0.5:
-                    self.force = 0
-                    self.thisGravity = self.force
-    	     
-            for obj in pe.objects:
-                if obj != self and hasattr(obj, "bodyType") and self.rect.colliderect(obj.rect) and obj.bodyType != "None":
-                    
-                    if obj == self.collidedObj: ico = True
-                    lastObj = self.collidedObj
-                    self.collidedObj = obj
-                    if self.onCollided != None and lastObj != obj:
-                        try: eval(f"self.onCollided{self.onCollidedContent}")
-                        except:
-                            eui.error = True
-                            tb = e.__traceback__
-                            filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
-                            eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
-                    
-                    if obj.bodyType != "kinematic":
-                        c += 1
-                        dx = min(abs(self.rect.right - obj.rect.left), abs(self.rect.left - obj.rect.right))
-                        dy = min(abs(self.rect.bottom - obj.rect.top - 8), abs(self.rect.top - obj.rect.bottom - 8))
-        	     		
-                        if dx < dy:
-                            c = 0
-                            if self.rect.right > obj.rect.left and self.rect.left < obj.rect.left:
-                                self.rightCollided = True
-                                rc = True
-                                self.rect.right = obj.rect.left
-                            elif self.rect.left < obj.rect.right and self.rect.right > obj.rect.right:
-                                lc = True
-                                self.leftCollided = True
-                                self.rect.left = obj.rect.right
-                        else:
-                            if self.rect.top < obj.rect.bottom and self.rect.top > obj.rect.top or self.lastTop > obj.rect.top:
-                                self.rect.top = obj.rect.bottom
-                                tc = True
-                                self.topCollided = True
-                                self.force = 0
-                                self.thisGravity = 0
-                            else:
-                                bc = True
-                                self.bottomCollided = True
-                                self.rect.bottom = obj.rect.top
-                                self.thisGravity = 0
-    	     
-            if self.frame % 2 == 0:
-                if not bc: self.bottomCollided = False
-                if not tc: self.topCollided = False
-                if not lc: self.leftCollided = False
-                if not rc: self.rightCollided = False
-            
-            if c == 0 and self.thisGravity == 0 and self.frame % 2 == 1:
-                self.thisGravity = self.gravity
-    	     	
-            if self.collidedObj != None and not ico and self.frame % 2 == 1:
+            self.velocity.y += pe.GRAVITY * self.mass
+            if self.velocity.y > self.terminal_velocity:
+                self.velocity.y = self.terminal_velocity
+            self.velocity.x = 0 if self.rect.x == self.lastX else 1 if self.rect.x > self.lastX else -1
+            self.check_collision("horizontal")
+            self.rect.y += self.velocity.y
+            self.check_collision("vertical")
+    	    
+            if self.collidedObj != None and self.frame % 2 == 1:
                 if not self.rect.colliderect(pygame.Rect(self.collidedObj.rect.x - 2, self.collidedObj.rect.y - 2, self.collidedObj.rect.width + 4, self.collidedObj.rect.height + 4)):
                     self.collidedObj = None
-                    if self.onUnCollided != None:
-                        try: eval(f"self.onUnCollided{self.onUnCollidedContent}")
+                    if type(self.onUnCollided).__name__ in ["method", "function"]:
+                        try:
+                            self.onUnCollided()
                         except:
                             eui.error = True
                             tb = e.__traceback__
                             filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
                             eui._console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
         
-        self.lastTop = self.rect.top
-        self.lastPos = self.rect.topleft
+        self.lastX = self.rect.x
+        self.lastY = self.rect.y
         self.CheckAnim()
         self.frame += 1
         
@@ -473,7 +441,9 @@ class Object:
             r = pe.Camera.apply(pos) if self.useCamera else self.rect
             if st.WR.colliderect(r):
                 img = self.CI
-                if self.flipX: img = pygame.transform.flip(img, True, False)
-                if self.flipY: img = pygame.transform.flip(img, False, True)
+                if self.flipX:
+                    img = pygame.transform.flip(img, True, False)
+                if self.flipY:
+                    img = pygame.transform.flip(img, False, True)
                         
                 self.win.blit(img, r)

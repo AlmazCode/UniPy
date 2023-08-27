@@ -22,33 +22,27 @@
 - `tag`: Тег объекта для фильтрации или поиска.
 - `useCamera`: Если True, объект будет отображаться из камеры.
 
-Для объектов с динамическим типом тела используйте `rect.x` и `rect.y` для изменения позиции в коде, а не `x` и `y`, чтобы обеспечить правильную обработку физики. (Это применяется только к коду)
-
-Пример:
-
-```python
-def Update():
-    player.rect.x += 1
-```
-
 Помните, что центрирование объекта происходит только при запуске. Чтобы выполнить повторное центрирование на основе параметров, вызовите функции в коде: `setPos` (right, left, top, bottom, centerx, centery) и `setPosObject` (objX, objY).
 
 UniPy предоставляет события для объектов, такие как нажатие и отпускание объекта. Эти события могут быть обработаны с помощью соответствующих функций.
 
-- `onPressed`: Вызывается, когда объект нажат, аргументы в `pressedContent`.
-- `onUnPressed`: Вызывается, когда объект отпущен, аргументы в `UnPressedContent`.
+- `onPressed`: Вызывается, когда объект нажат.
+- `onUnPressed`: Вызывается, когда объект отпущен.
 
 Пример:
 
 ```python
-def resize(amount):
-    player.width += amount
-    player.height += amount
+import UniPy as up
 
-player.onPressed = resize
-player.onPressedContent = (10)
-player.onUnPressed = resize
-player.onUnPressedContent = (-10)
+button = up.GetObj("bt")
+
+def _onPressed():
+    up.log("button has been pressed")
+def _onReleased():
+    up.log("button has been released")
+
+button.onPressed = _onPressed
+button.onUnPressed = _onReleased
 ```
 
 Используйте `pressed()`, чтобы проверить, был ли объект нажат в текущем кадре. Например:

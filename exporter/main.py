@@ -1,16 +1,14 @@
 import pygame
-
 import engine.settings as st
 import engine.engine as eui
-eui.startLogo()
 import engine.UniPy as pe
 import engine.pather as pt
 
+eui.startLogo()
 eui.loadResourses()
 eui.startApp()
 
 while 1:
-    
     pe.deltaTime = st.clock.tick(st.fps) / 1000.0
     
     for event in pygame.event.get():
@@ -30,8 +28,10 @@ while 1:
             for obj in pe.objects:
                 obj.win = st.winApp
                 obj.adapt()
-            for obj in pe.objects: obj.setPos()
-            for obj in pe.objects: obj.setPosObject()
+            for obj in pe.objects:
+                obj.setPos()
+            for obj in pe.objects:
+                obj.setPosObject()
             
             for script in st.modules:
                 try:
@@ -46,23 +46,23 @@ while 1:
         elif event.type == pygame.KEYDOWN:
             for script in st.modules:
                 try:
-                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.key)
                 except Exception as e: ...
             
             for script in pe.OWS:
                 try:
-                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.unicode)
+                    if hasattr(script, "onKeyDown"): script.onKeyDown(event.key)
                 except Exception as e: ...
         
         elif event.type == pygame.KEYUP:
             for script in st.modules:
                 try:
-                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.key)
                 except Exception as e: ...
             
             for script in pe.OWS:
                 try:
-                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.unicode)
+                    if hasattr(script, "onKeyUp"): script.onKeyUp(event.key)
                 except Exception as e: ...
         
         elif event.type == pygame.TEXTINPUT:
@@ -174,7 +174,6 @@ while 1:
              	    if hasattr(script, "onFingerMotion"): script.onFingerMotion(event.finger_id, pe.fingersPos[event.finger_id])
              	except Exception as e: ...
 	            	
-    
     eui.drawApp()
     try: pygame.display.flip()
     except: ...

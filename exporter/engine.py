@@ -8,24 +8,19 @@ import engine.settings as st
 import engine.pather as pt
 import copy, sys, collections, os
 
-
 pygame.mixer.init()
-
 
 def loadResourses():
     st.modules = []
     loadModules()
     
     for i in st.files:
-    	
     	if i.split(".")[-1] in pe._imgTypes and i != st.EIK:
     		txs = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
     		pe.texturesTSP[i] = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert_alpha()
-    		
     		pe.textures[i] = pygame.image.load(f"{st.dirs[st.files.index(i)]}{pt.s}{i}").convert()
     		
     		replacement_color = (1, 1, 1)
-    		
     		for x in range(txs.get_width()):
     		    for y in range(txs.get_height()):
     		        if list(txs.get_at((x, y)))[-1] == 0:
@@ -37,7 +32,6 @@ def loadResourses():
     		pe.textures[i].set_colorkey(replacement_color)
     	
     	elif i.split(".")[-1] in pe._audioTypes: pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
-
 
 def startLogo():
     try: img = pygame.image.load(f"res{pt.s}{st.EIK}").convert()
@@ -130,6 +124,7 @@ def startApp():
     pe.OWS = []
     pe.Camera.target = None
     pe.Camera.x, pe.Camera.y = 0, 0
+    pe.GRAVITY = pe.STARTGRAVITY
     
     MHFS = []
     st.MHFU = []

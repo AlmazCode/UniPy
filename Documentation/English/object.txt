@@ -22,33 +22,27 @@ The following are the object components that can be modified in the editor:
 - `tag`: Object tag for filtering or searching.
 - `useCamera`: If True, the object will be displayed from the camera.
 
-For objects with a dynamic body type, use `rect.x` and `rect.y` for position modifications in code, rather than `x` and `y`, to ensure proper physics handling. (This applies only to code)
-
-Example:
-
-```python
-def Update():
-    player.rect.x += 1
-```
-
 Remember, object centering only occurs at startup. To re-center based on parameters, call functions in the code: `setPos` (right, left, top, bottom, centerx, centery) and `setPosObject` (objX, objY).
 
 UniPy provides events for objects, like object press and release. These events can be handled with corresponding functions.
 
-- `onPressed`: Called when object is pressed, arguments in `pressedContent`.
-- `onUnPressed`: Called when object is released, arguments in `UnPressedContent`.
+- `onPressed`: Called when object is pressed.
+- `onUnPressed`: Called when object is released.
 
 Example:
 
 ```python
-def resize(amount):
-    player.width += amount
-    player.height += amount
+import UniPy as up
 
-player.onPressed = resize
-player.onPressedContent = (10)
-player.onUnPressed = resize
-player.onUnPressedContent = (-10)
+button = up.GetObj("bt")
+
+def _onPressed():
+    up.log("button has been pressed")
+def _onReleased():
+    up.log("button has been released")
+
+button.onPressed = _onPressed
+button.onUnPressed = _onReleased
 ```
 
 Use `pressed()` to check if the object was pressed in the current frame. For instance:
