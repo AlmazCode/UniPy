@@ -1,0 +1,20 @@
+{
+    "Conductor":
+    {
+      "color": [50, 50, 50],
+      "code_bg_color": [40, 44, 52],
+      "elem_color": [100, 100, 100],
+      "pressed_elem_color": [30, 144, 255],
+      "text_color": [255, 255, 255],
+      "pressed_text_color": [225, 225, 225],
+      "elem_stroke_color": [90, 90, 90],
+      "pressed_elem_stroke_color": [0, 114, 255],
+      "fill_size": 0,
+      "elem_border_radius": 15,
+      "elem_fill_size": 0,
+      "elem_stroke_size": 3,
+      "scroll_speed": 1,
+      "mouse_scroll_speed": 15,
+      "elem_offset_y": 10
+    }
+}

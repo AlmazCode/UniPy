@@ -1,0 +1,14 @@
+{
+    "Message":
+    {
+      "color": [80, 80, 80],
+      "stroke_color": [60, 60, 60],
+      "text_color": [255, 255, 255],
+      "border_radius": 15,
+      "fill_size": 0,
+      "stroke_size": 3,
+      "stop_time": 120,
+      "start_time": 30,
+      "end_time": 30
+    }
+}

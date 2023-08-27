@@ -1,0 +1,25 @@
+{
+    "SelectorInObjectInspector":
+    {
+      "color": [100, 100, 100],
+      "elem_color": [130, 130, 130],
+      "pressed_elem_color": [30, 144, 255],
+      "text_color": [255, 255, 255],
+      "pressed_text_color": [225, 225, 225],
+      "stroke_color": [30, 30, 30],
+      "pressed_stroke_color": [40, 40, 40],
+      "elem_stroke_color": [120, 120, 120],
+      "pressed_elem_stroke_color": [0, 114, 255],
+      "border_radius": 15,
+      "fill_size": 0,
+      "elem_border_radius": 15,
+      "elem_fill_size": 0,
+      "stroke_size": 0,
+      "elem_stroke_size": 3,
+      "centering": "left",
+      "text_centering": "left",
+      "elem_width_div": 1.5,
+      "elem_height_div": 5,
+      "text_offset": 3
+    }
+}

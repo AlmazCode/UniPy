@@ -8,8 +8,8 @@ _defaultPath = None
 _userName = getpass.getuser()
 s = "/"
 if _platform == "Windows":
-    _defaultPath = f"C:\\\\Users\\\\{_userName}\\\\"
-    s = "\\\\"
+    _defaultPath = f"C:\\Users\\{_userName}\\"
+    s = "\\"
 elif _platform == "Darwin":
     _defaultPath = f"/Users/{_userName}/"
 elif _platform == "Linux" and not hasattr(sys, 'getandroidapilevel'):

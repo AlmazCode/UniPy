@@ -1,0 +1,18 @@
+{
+    "Input":
+    {
+      "color": [130, 130, 130],
+      "pressed_color": [100, 100, 100],
+      "cursor_color": [0, 150, 255],
+      "text_color": [255, 255, 255],
+      "pressed_text_color": [225, 225, 225],
+      "stroke_color": [100, 100, 100],
+      "pressed_stroke_color": [70, 70, 70],
+      "border_radius": 15,
+      "fill_size": 0,
+      "stroke_size": 3,
+      "max_chars": 256,
+      "cursor_tick_time": 15,
+      "text_offset": 3
+    }
+}

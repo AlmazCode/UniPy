@@ -10,6 +10,7 @@ score = 0
 bestScore = up.LoadVariable("bestScore", 0)
 
 up.SetBgColor((0, 180, 0))
+up.GRAVITY = 0.0
 lt = up.GetObj("leftTouch")
 rt = up.GetObj("rightTouch")
 player = up.GetObj("player")

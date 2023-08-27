@@ -1,0 +1,13 @@
+{
+    "Console":
+    {
+      "color": [60, 60, 60],
+      "log_color": [255, 255, 255],
+      "error_color": [255, 0, 0],
+      "warning_color": [255, 255, 0],
+      "img_size": 64,
+      "max_messages": 50,
+      "scroll_speed": 1,
+      "mouse_scroll_speed": 15
+    }
+}

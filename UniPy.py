@@ -1,6 +1,6 @@
 import engineUI as eui
 import settings as st
-import os, inspect, collections
+import os, inspect, collections, re
 import pather as pt
 from objects import camera
 from modules import Math
@@ -12,6 +12,10 @@ objects = []
 fingersPos = [None] * 10
 OWS = []
 Camera = camera.Camera(st.AppWidth, st.AppHeight)
+
+STARTGRAVITY = 0.48
+GRAVITY = STARTGRAVITY
+TERMINALVELOCITY = 48
 
 wWidth, wHeight = st.AppWidth, st.AppHeight
 pWidth, pHeight = st.projectSize
@@ -50,6 +54,22 @@ def SetBgColor(color: tuple):
         file = caller_frame.f_code.co_filename
         line = caller_frame.f_lineno
         Error(file, line, f"\"{color}\" invalid color", "warning")
+
+def __isRGB(s):
+    formats = [
+        r"(\d+)\s*,\s*(\d+)\s*,\s*(\d+)",
+        r"\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\)",
+        r"\[(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\]"
+    ]
+    
+    for fmt in formats:
+        match = re.fullmatch(fmt, s)
+        if match:
+            r, g, b = map(int, match.groups())
+            if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
+                return True
+    
+    return False
 
 def SaveVariable(key: str, value: any, _type: any):
     path = f".{pt.s}projects{pt.s}{st.projects[st.projectIdx]}{pt.s}$data"

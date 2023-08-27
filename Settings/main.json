@@ -1,0 +1,11 @@
+{
+    "Main":
+    {
+      "bg_color": [60, 60, 60],
+      "text_color": [255, 255, 255],
+      "stroke_color_in_object_inspector": [130, 130, 130],
+      "engine_images_color": [255, 255, 255],
+      "image_size_in_object_inspector": 196,
+      "font": "calibri.ttf"
+    }
+}

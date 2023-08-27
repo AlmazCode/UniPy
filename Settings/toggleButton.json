@@ -1,0 +1,12 @@
+{
+    "ToggleButton":
+    {
+      "active_color": [130, 130, 130],
+      "non_active_color": [100, 100, 100],
+      "active_stroke_color": [100, 100, 100],
+      "non_active_stroke_color": [70, 70, 70],
+      "border_radius": 15,
+      "fill_size": 8,
+      "stroke_size": 3
+    }
+}

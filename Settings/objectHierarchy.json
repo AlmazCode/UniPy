@@ -1,0 +1,26 @@
+{
+    "ObjectHierarchy":
+    {
+      "color": [50, 50, 50],
+      "elem_color": [100, 100, 100],
+      "pressed_elem_color": [30, 144, 255],
+      "text_color": [255, 255, 255],
+      "pressed_text_color": [225, 225, 225],
+      "stroke_color": [30, 30, 30],
+      "pressed_stroke_color": [40, 40, 40],
+      "elem_stroke_color": [70, 70, 70],
+      "pressed_elem_stroke_color": [0, 114, 255],
+      "border_radius": 15,
+      "fill_size": 0,
+      "elem_border_radius": 15,
+      "elem_fill_size": 0,
+      "stroke_size": 0,
+      "elem_stroke_size": 3,
+      "centering": "left",
+      "text_centering": "left",
+      "elem_width_div": 1.5,
+      "scroll_speed": 1,
+      "mouse_scroll_speed": 15,
+      "text_offset": 3
+    }
+}

@@ -24,7 +24,8 @@ scc: {'cube': {'x': True, 'y': True, 'light_source': True, 'z': True, 'angle_y':
 color: [255, 0, 0],
 uc: True,
 t: 'obj',
-l: 0
+l: 0,
+m: 1
 !next!
 inf,
 Text,
@@ -52,4 +53,4 @@ scc: {},
 uc: True,
 l: 0,
 t: 'obj',
-sm: False
+sm: True

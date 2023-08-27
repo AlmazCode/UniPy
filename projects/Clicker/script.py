@@ -15,6 +15,8 @@ btUpdate = GetObj("btUpdate")
 money = 0
 CC = 0
 price = 100
+isPressed = False
+bw, bh, tfs = bt.width, bt.height, txCC.fontSize
 
 def Start():
     global money, CC, price
@@ -29,17 +31,36 @@ def Start():
     if len(g) == 1: g.append("0")
     txCC.text = f"{g[0]}.{g[1][0]} за клик"
     txPrice.text = f"Улучшить\n{price}\nкоинов"
-
-def addMoney(state: bool):
-    global money
     
-    money += CC if state else 0
-    tx.text = f"{int(money)}"
-    SaveVariable("moneys", money, int)
+def onClick():
+    global isPressed, bw, bh, tfs
+    
     bt.anims = []
     txCC.anims = []
-    bt.AddAnim([4, 4], f"width = {266 if state else 255}; height = {266 if state else 255}", [], [], True)
-    txCC.AddAnim([2], f"fontSize = {36 if state else 32}", [], [], True)
+    
+    if not isPressed:
+        addMoney()
+        bt.AddAnim([4, 4], f"width = {bw + 10}; height = {bh + 10}", [], [], True)
+        txCC.AddAnim([2], f"fontSize = {tfs + 4}", [], [], True)
+        isPressed = True
+        bw += 10
+        bh += 10
+        tfs += 4
+        
+    else:
+        bt.AddAnim([4, 4], f"width = {bw - 10}; height = {bh -+ 10}", [], [], True)
+        txCC.AddAnim([2], f"fontSize = {tfs -+ 4}", [], [], True)
+        isPressed = False
+        bw -= 10
+        bh -= 10
+        tfs -= 4
+    
+def addMoney():
+    global money
+    
+    money += CC
+    tx.text = f"{int(money)}"
+    SaveVariable("moneys", money, int)
 
 def updateClicks():
 	global price, money, CC
@@ -59,9 +80,6 @@ def updateClicks():
 		txCC.text = f"{g[0]}.{g[1][0]} за клик"
 		txPrice.text = f"Улучшить\n{price}\nкоинов"
 
-bt.onPressed = addMoney
-bt.onPressedContent = "(True)"
-bt.onUnPressed = addMoney
-bt.onUnPressedContent = "(False)"
-
+bt.onPressed = onClick
+bt.onUnPressed = onClick
 btUpdate.onPressed = updateClicks

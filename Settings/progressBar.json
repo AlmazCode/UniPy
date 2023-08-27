@@ -1,0 +1,13 @@
+{
+    "ProgressBar":
+    {
+      "color": [100, 100, 100],
+      "text_color": [255, 255, 255],
+      "title_color": [255, 255, 255],
+      "progress_color": [0, 255, 0],
+      "progress_bg_color": [140, 140, 140],
+      "border_radius": -1,
+      "fill_size": 0,
+      "progress_border_radius": -1
+    }
+}

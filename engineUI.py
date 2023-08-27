@@ -9,18 +9,23 @@ from UI import (
 	message
 )
 
-from objects.object import Object
-from objects.text import Text
 from exporter import build
 
 import engineOUAR as ouar
 import UniPy as pe
 import settings as st
-import os, traceback, shutil, copy, re, sys, collections, zipfile, pygame, importlib, ast
 import pather as pt
+import os
+import traceback
+import shutil
+import copy
+import re
+import sys
+import collections
+import pygame
+import ast
 
 pygame.mixer.init()
-os.system("clear -r")
 
 # settings
 error = False
@@ -36,7 +41,7 @@ OPII = 0
 uiEngineImages = {}
 imgs = os.listdir("assets")
 for img in [file for file in imgs if file.split(".")[-1] not in ["otf", "ttf"]]:
-    uiEngineImages[img.split(".", 1)[0]] = pygame.image.load(f"assets{pt.s}{img}")
+    uiEngineImages[img.split(".", 1)[0]] = pygame.image.load(f"assets{pt.s}{img}")#.convert()
 
 uiEngineImages["down"] = pygame.transform.rotozoom(uiEngineImages["up"], 180, 1.0)
 uiEngineImages["back"] = pygame.transform.rotozoom(uiEngineImages["up"], 90, 1.0)
@@ -115,24 +120,25 @@ def openProject(idx):
     
     # load all files from project
     for i in st.files:
-    	
-    	PB.setItemName(i)
-    	drawProjects()
-    	PB.update()
-    	for msg in message.messages: msg.update()
-    	pygame.display.flip()
-    	
-    	if i.split(".")[-1] in pe._imgTypes:
-    	    pe.textures[i], pe.texturesTSP[i] = loadImage(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
-    	
-    	elif i.split(".")[-1] in pe._audioTypes:
-    	    pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
-    	
-    	PB.itemLoaded()
-    	drawProjects()
-    	PB.update()
-    	for msg in message.messages: msg.update()
-    	pygame.display.flip()
+        PB.setItemName(i)
+        drawProjects()
+        PB.update()
+        for msg in message.messages:
+            msg.update()
+        pygame.display.flip()
+        
+        if i.split(".")[-1] in pe._imgTypes:
+            pe.textures[i], pe.texturesTSP[i] = loadImage(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+        
+        elif i.split(".")[-1] in pe._audioTypes:
+            pe.audios[i] = pygame.mixer.Sound(f"{st.dirs[st.files.index(i)]}{pt.s}{i}")
+        
+        PB.itemLoaded()
+        drawProjects()
+        PB.update()
+        for msg in message.messages:
+            msg.update()
+        pygame.display.flip()
         	
     # load game objects
     ouar.loadObjs(pe, f"{PATH}{pt.s}{st.projects[idx]}{pt.s}ObjectInfo.txt")
@@ -147,11 +153,11 @@ def openProject(idx):
 
 # functions
 
-def createMessage(surface, text: str, stopTime: int = 90, startTime: int = 30, endTime: int = 30, *args):
+def createMessage(surface, text: str):
     oY = None
     if message.messages:
         oY = message.messages[-1].y - message.messages[-1].image.get_height() - 10
-    message.Message(surface, message = text, bgColor = st.uiMBGC, font = st.uiFont, textColor = st.uiMTC, borderRadius = st.uiMBR, fillSize = st.uiMFS, startTime = startTime, endTime = endTime, stopTime = stopTime, y = oY)
+    message.Message(surface, message = text, font = st.uiFont, y = oY, **st.UI_Settings["Message"])
 
 # create new project
 def createProject():
@@ -193,10 +199,10 @@ def AddFileToPAC(path):
     except: ...
     
     if path.split(".")[-1] in pe._imgTypes:
-    	pe.textures[path.split(pt.s)[-1]], pe.texturesTSP[path.split(pt.s)[-1]] = loadImage(path)
+        pe.textures[path.split(pt.s)[-1]], pe.texturesTSP[path.split(pt.s)[-1]] = loadImage(path)
     	
     elif path.split(".")[-1] in pe._audioTypes:
-    	pe.audios[path.split(pt.s)[-1]] = pygame.mixer.Sound(path)
+        pe.audios[path.split(pt.s)[-1]] = pygame.mixer.Sound(path)
     
     PAC.reOpenPath()
     startPACR()
@@ -264,7 +270,7 @@ def CloseMenuToExportProject():
 def ExportProject():
     size, vr = loadProjectInfoData(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}")
     build.createProject(st.exportProjectPath, f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}", PM.elements[PM.elem_idx], PM.elements[PM.elem_idx], size, vr)
-    createMessage(st.win, f'The project was successfully exported to path:\n"{st.exportProjectPath}"', stopTime = 120)
+    createMessage(st.win, f'The project was successfully exported to path:\n"{st.exportProjectPath}"')
 
 # delete project
 def deleteFolderInPM():
@@ -281,8 +287,8 @@ def deleteFileInPAC():
     if not os.path.isdir(path):
         os.remove(path)
         if path in pe.textures:
-        	del pe.textures[path]
-        	del pe.texturesTSP[path]
+            del pe.textures[path]
+            del pe.texturesTSP[path]
     else:
         shutil.rmtree(path)
     PAC.reOpenPath()
@@ -380,7 +386,7 @@ def importProjects():
         if os.path.isdir(f"{fileConductor.thisPath}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}"):
             try: shutil.copytree(f"{fileConductor.thisPath}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}", f"{PATH}{pt.s}{fileConductor.elements[fileConductor.elem_idx]}")
             except Exception as e:
-                createMessage(st.win, f"Failed to import the project \"{fileConductor.elements[fileConductor.elem_idx]}\"", stopTime = 120)
+                createMessage(st.win, f"Failed to import the project \"{fileConductor.elements[fileConductor.elem_idx]}\"")
     else:
         fls = os.listdir(fileConductor.thisPath)
         for f in fls:
@@ -388,7 +394,7 @@ def importProjects():
                 try:
                     shutil.copytree(f"{fileConductor.thisPath}{pt.s}{f}", f"{PATH}{pt.s}{f}")
                 except Exception as e:
-                    createMessage(st.win, f"Failed to import the project \"{f}\"", stopTime = 120)
+                    createMessage(st.win, f"Failed to import the project \"{f}\"")
 
     st.drawingLayer = -1
     st.projects = os.listdir(PATH)
@@ -411,6 +417,7 @@ def closeCRfromExportProject():
 
 def closeCRfromImportProject():
     st.drawingLayer = -1
+    btCancelCR.func = closeCR
 
 # start conductor
 def startCR():
@@ -439,7 +446,7 @@ def startRenameFilePAC():
     IFFIPAC.text = PAC.elements[PAC.elem_idx]
     IFFIPAC.has_press((-1, -1))
     IFFIPAC.check_text()
-    IFFIPAC.rect.y = PAC.getIdxPos(PAC.elem_idx)
+    IFFIPAC.rect.y = PAC.get_idx_pos(PAC.elem_idx)
 
 # rename project
 def startRenameProject():
@@ -453,10 +460,10 @@ def startRenameProject():
 # end rename project
 def endRenameProject():
     if IFRPIPM.text != "" and PM.elements[PM.elem_idx] != IFRPIPM.text:
-	    os.rename(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}", f"{PATH}{pt.s}{IFRPIPM.text}")
-	    st.projects = os.listdir(PATH)
-	    PM.elements = st.projects
-	    PM.normalize()
+        os.rename(f"{PATH}{pt.s}{PM.elements[PM.elem_idx]}", f"{PATH}{pt.s}{IFRPIPM.text}")
+        st.projects = os.listdir(PATH)
+        PM.elements = st.projects
+        PM.normalize()
 	    
     st.isRenameProject = False
     st.lastPressedInput = None
@@ -658,7 +665,7 @@ def loadOBJScriptLinks(idx):
                 with open(f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}{script.replace('.', pt.s)}.py") as code:
                     parsed_ast = ast.parse(code.read())
             except:
-                createMessage(st.win, f"Script \"{script}\" was not found", stopTime = 120)
+                createMessage(st.win, f"Script \"{script}\" was not found")
                 del result[script]
                 continue
             
@@ -680,7 +687,7 @@ def loadOBJScriptLinks(idx):
         return result
     else:
         return {}
-    
+
 # start app
 def startApp():
     global error
@@ -693,6 +700,7 @@ def startApp():
     pe.OWS = []
     pe.Camera.target = None
     pe.Camera.x, pe.Camera.y = 0, 0
+    pe.GRAVITY = pe.STARTGRAVITY
     
     MHFS = []
     st.MHFU = []
@@ -716,12 +724,15 @@ def startApp():
     st.drawingLayer = 1
     btStartApp.func = returnToEditor
     btStartApp.original_image = uiEngineImages["cancel"]
-    btStartApp.height = st.height - st.AppHeight - 20
+    btStartApp.height = st.height - st.AppHeight - 10
     btStartApp.width = btStartApp.height * 2
+    btStartApp.y = -5
     btStartApp.adjust_dimensions_and_positions()
     
-    for obj in pe.objects: obj.setPos()
-    for obj in pe.objects: obj.setPosObject()
+    for obj in pe.objects:
+        obj.setPos()
+    for obj in pe.objects:
+        obj.setPosObject()
     
     for script in MHFS:
         try:
@@ -747,6 +758,7 @@ def returnToEditor():
     btStartApp.original_image = uiEngineImages["play"]
     btStartApp.height = st.uiBS
     btStartApp.width = st.uiBS
+    btStartApp.y = -10
     btStartApp.adjust_dimensions_and_positions()
     
     ouar.loadObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
@@ -755,7 +767,6 @@ def returnToEditor():
 def SOTCBC():
     SOHM.scrolling = False
     st.isCreateObject = True
-    btShowPanel.fontSize = st.uiBFS
     btShowPanel.original_image = uiEngineImages["cancel"]
     btShowPanel.func = COTCBC
     btShowPanel.adjust_dimensions_and_positions()
@@ -764,7 +775,6 @@ def SOTCBC():
 def COTCBC():
     SOHM.scrolling = True
     st.isCreateObject = False
-    btShowPanel.fontSize = st.uiBFS
     btShowPanel.original_image = uiEngineImages["plus"]
     btShowPanel.func = SOTCBC
     btShowPanel.adjust_dimensions_and_positions()
@@ -812,7 +822,7 @@ def changeObjProperty(key, content = None):
             st.lastSelectionObject = ObjName.text
         elif ObjName.text.strip() != pe.objName[idx]:
             ObjName.text = pe.objName[idx]
-            createMessage(st.win, f"Oops, an object with that name already exists.", stopTime = 120)
+            createMessage(st.win, f"Oops, an object with that name already exists.")
         
     elif key == "x":
         if isMathOperation(ObjX.text):
@@ -901,15 +911,15 @@ def changeObjProperty(key, content = None):
         pe.objects[idx].tag = ObjTag.text
     
     elif key == "color":
-        if isMathOperation(Objcolor.text):
+        if pe.__isRGB(ObjColor.text):
             try:
-                pe.objects[idx].color = int(eval(ObjColor.text))
+                pe.objects[idx].color = list(eval(ObjColor.text))
             except: ...
         ObjColor.text = str(pe.objects[idx].color)
     
     elif key == "transparent":
         try:
-	        pe.objects[idx].transparent = max(0, min(255, eval(ObjTSP.text)))
+            pe.objects[idx].transparent = max(0, min(255, eval(ObjTSP.text)))
         except: ...
         ObjTSP.text = str(pe.objects[idx].transparent)
     
@@ -975,34 +985,36 @@ def setScriptVarValue(script, type, var, value, OBJ = None):
     idx = pe.objName.index(st.lastSelectionObject)
     obj = pe.objects[idx]
     
-    try:
-        value = eval(f"{type}({value})")
-        _val = str(value)
-        g = loadOBJScriptLinks(idx)
-        if script.split(".")[-1] in obj.SC_CHANGED:
-            if g[script][var] == value:
-                obj.SC_CHANGED[script.split(".")[-1]][var] = False
-            else:
-                obj.SC_CHANGED[script.split(".")[-1]][var] = True
+ #   try:
+    if type == "str":
+        value = f"\"{value}\""
+    value = eval(f"{type}({value})")
+    _val = str(value)
+    g = loadOBJScriptLinks(idx)
+    if script.split(".")[-1] in obj.SC_CHANGED:
+        if g[script][var] == value:
+            obj.SC_CHANGED[script.split(".")[-1]][var] = False
         else:
-            obj.S_CONTENT[script.split(".")[-1]] = {}
-            obj.SC_CHANGED[script.split(".")[-1]] = {}
-            obj.S_CONTENT[script.split(".")[-1]][var] = [g[script][var], type]
             obj.SC_CHANGED[script.split(".")[-1]][var] = True
+    else:
+        obj.S_CONTENT[script.split(".")[-1]] = {}
+        obj.SC_CHANGED[script.split(".")[-1]] = {}
+        obj.S_CONTENT[script.split(".")[-1]][var] = [g[script][var], type]
+        obj.SC_CHANGED[script.split(".")[-1]][var] = True
                                 
-        if var not in obj.S_CONTENT[script.split(".")[-1]]:
-            obj.S_CONTENT[script.split(".")[-1]][var] = [value, type]
-            obj.SC_CHANGED[script.split(".")[-1]][var] = True
-        else:
-            obj.S_CONTENT[script.split(".")[-1]][var][0] = value
-        ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
-        try:
-            OBJ.text = str(value)
-            OBJ.endText = 0
-            OBJ.check_text()
-        except: pass
-    except:
-        OBJ.set_old_text()
+    if var not in obj.S_CONTENT[script.split(".")[-1]]:
+        obj.S_CONTENT[script.split(".")[-1]][var] = [value, type]
+        obj.SC_CHANGED[script.split(".")[-1]][var] = True
+    else:
+        obj.S_CONTENT[script.split(".")[-1]][var][0] = value
+    ouar.saveObjs(pe, f"{PATH}{pt.s}{st.projects[st.projectIdx]}{pt.s}ObjectInfo.txt")
+    try:
+        OBJ.text = str(value)
+        OBJ.endText = 0
+        OBJ.check_text()
+    except: pass
+    #except:
+#        OBJ.set_old_text()
 
 # load object property
 def setObjProperty(text, resetOPII = True):
@@ -1088,15 +1100,15 @@ def setObjProperty(text, resetOPII = True):
         for var, value in zip(_vars, _values):
             tp = type(value).__name__
             
-            if pe.objects[idx].S_CONTENT != {} and var in pe.objects[idx].S_CONTENT[s.split(".")[-1]]:
+            if pe.objects[idx].S_CONTENT != {} and s.split(".")[-1] in pe.objects[idx].S_CONTENT and var in pe.objects[idx].S_CONTENT[s.split(".")[-1]]:
                 if pe.objects[idx].SC_CHANGED[s.split(".")[-1]][var]:
                     value = pe.objects[idx].S_CONTENT[s.split(".")[-1]][var][0]
                     
             if tp != "NoneType":
                 if tp == "bool":
-                    objComponents.append(toggleButton.ToggleButton(st.win, var, setScriptVarValue, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC, content = f"('{s}', '{tp}', self.key, str(self.active))", active = value))
+                    objComponents.append(toggleButton.ToggleButton(st.win, var, setScriptVarValue, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, content = f"('{s}', '{tp}', self.key, str(self.active))", active = value, **st.UI_Settings["ToggleButton"]))
                 else:
-                    objComponents.append(input.Input(st.win, setScriptVarValue, noText = f"value ({tp})...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = var, content = f"('{s}', '{tp}', self.key, self.text, self)", textColor = st.uiITC, text = str(value)))
+                    objComponents.append(input.Input(st.win, setScriptVarValue, noText = f"value ({tp})...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = var, content = f"('{s}', '{tp}', self.key, self.text, self)", text = str(value), **st.UI_Settings["Input"]))
                 objComponents[-1].rect.y = objComponents[idxx - 1].rect.y + objComponents[idxx - 1].rect.height + 20
                 if not FINS:
                     objComponents[-1].rect.y += CSTN[-1].get_height() + 20
@@ -1117,172 +1129,199 @@ def setObjProperty(text, resetOPII = True):
             i.endText = 0
             i.check_text()
 
+def srollObjectComponents():
+    global OPII
+    
+    if st.lastSelectionObject != None and st.drawingLayer == 0:
+        if st.scrollPos and st.MBP:
+            scroll_amount = st.MP[1] - st.scrollPos[1]
+            OPII += scroll_amount * st.scrollSpeed
+            for i in objComponents:
+                i.rect.y += scroll_amount * st.scrollSpeed
+            if st.isSelector:
+                ObjSW.y += scroll_amount * st.scrollSpeed
+        st.scrollPos = st.MP
+        if OPII > 0:
+            OPII = 0
+            for i in objComponents:
+                i.rect.y = i.start_y
+            if st.isSelector:
+                ObjSW.y = st.LPBFS.rect.y - ObjSW.surface.get_height() - 10
+        if abs(OPII) > objComponents[-1].start_y:
+            OPII = -objComponents[-1].start_y
+            for i in objComponents:
+                i.rect.y = i.start_y + OPII
+            if st.isSelector:
+                ObjSW.y = st.LPBFS.rect.y - ObjSW.surface.get_height() - 10
+    
 # button for start app
-btStartApp = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, func = startApp, x = -10, y = -10, image = uiEngineImages["play"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btStartApp = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = startApp, x = -10, y = -10, image = uiEngineImages["play"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for console
-btSCC = button.Button(st.win, height = st.height - st.AppHeight - 20, width = (st.height - st.AppHeight - 20) * 2, text = "console", borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = showConsole, x = f"-self.width * 1 - 20", y = -10, image = uiEngineImages["console"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btSCC = button.Button(st.win, height = st.height - st.AppHeight - 10, width = (st.height - st.AppHeight - 10) * 2, fontPath = st.uiFont, func = showConsole, x = f"-self.width * 1 - 20", y = -5, image = uiEngineImages["console"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for close object info
-btCloseInfo = button.Button(st.win, y = 10, x = -10,  width = st.uiBS, height = st.uiBS, text = "X", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = closeObjectInfo, fontPath = st.uiFont, image = uiEngineImages["cancel"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right")
+btCloseInfo = button.Button(st.win, y = 10, x = -10,  width = st.uiBS, height = st.uiBS, func = closeObjectInfo, fontPath = st.uiFont, image = uiEngineImages["cancel"], cx = "right", **st.UI_Settings["Button"])
 
 # button for show panel for adding objects
-btShowPanel = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = SOTCBC, fontPath = st.uiFont, x = -10, y = f"-self.height * 1 - 20", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["plus"], cx = "right", cy = "bottom")
+btShowPanel = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = SOTCBC, fontPath = st.uiFont, x = -10, y = f"-self.height * 1 - 20", image = uiEngineImages["plus"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for return to choose project
-btToCP = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = toCP, fontPath = st.uiFont, y = f"-self.height * 2 - 30", x = -10, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["back"], cx = "right", cy = "bottom")
+btToCP = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = toCP, fontPath = st.uiFont, y = f"-self.height * 2 - 30", x = -10, image = uiEngineImages["back"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button open project assets
-btOPA = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startPACR, fontPath = st.uiFont, y = f"-self.height * 3 - 40", x = -10, image = uiEngineImages["files"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btOPA = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = startPACR, fontPath = st.uiFont, y = f"-self.height * 3 - 40", x = -10, image = uiEngineImages["files"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for down project
-btPD = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = objectDown, fontPath = st.uiFont, y = f"-self.height * 4 - 50", x = -10, image = uiEngineImages["down"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btPD = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = objectDown, fontPath = st.uiFont, y = f"-self.height * 4 - 50", x = -10, image = uiEngineImages["down"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for up project
-btPU = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = objectUp, fontPath = st.uiFont, y = f"-self.height * 5 - 60", x = -10, image = uiEngineImages["up"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btPU = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = objectUp, fontPath = st.uiFont, y = f"-self.height * 5 - 60", x = -10, image = uiEngineImages["up"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for copy object
-btCopy = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = copyObject, fontPath = st.uiFont, y = f"-self.height * 6 - 70", x = -10, image = uiEngineImages["copy"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btCopy = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = copyObject, fontPath = st.uiFont, y = f"-self.height * 6 - 70", x = -10, image = uiEngineImages["copy"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for delete object
-btDeleteObj = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = deleteObj, fontPath = st.uiFont, y = f"-self.height * 7 - 80", x = -10, image = uiEngineImages["trash"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right", cy = "bottom")
+btDeleteObj = button.Button(st.win, width = st.uiBS, height = st.uiBS, func = deleteObj, fontPath = st.uiFont, y = f"-self.height * 7 - 80", x = -10, image = uiEngineImages["trash"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for cancel load file in conductor
-btCancelCR = button.Button(st.win, y = 10, x = -10, width = st.uiBS, height = st.uiBS, text = "cancel", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = closeCR, fontPath = st.uiFont, image = uiEngineImages["cancel"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right")
+btCancelCR = button.Button(st.win, y = 10, x = -10, width = st.uiBS, height = st.uiBS, func = closeCR, fontPath = st.uiFont, image = uiEngineImages["cancel"], cx = "right", **st.UI_Settings["Button"])
 
 # button for back in conductor
-btBackCR = button.Button(st.win, x = f"-self.width * 1 - 20", y = 10, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = backCR, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["back"], cx = "right")
+btBackCR = button.Button(st.win, x = f"-self.width * 1 - 20", y = 10, width = st.uiBS, height = st.uiBS, func = backCR, fontPath = st.uiFont, image = uiEngineImages["back"], cx = "right", **st.UI_Settings["Button"])
 
 # button for delete obj image or font in conductor
-btDeleteCR = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = changeObjProperty, fontPath = st.uiFont, content = "('image', None)", image = uiEngineImages["trash"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right")
+btDeleteCR = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, func = changeObjProperty, fontPath = st.uiFont, content = "('image', None)", image = uiEngineImages["trash"], cx = "right", **st.UI_Settings["Button"])
 
 # button for file to project assets conductor
-btAddFile = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startCRfromPAC, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["plus"], cx = "right")
+btAddFile = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, func = startCRfromPAC, fontPath = st.uiFont, image = uiEngineImages["plus"], cx = "right", **st.UI_Settings["Button"])
 
 # button for create new folder in project assets conductor
-btAddFolder = button.Button(st.win, y = 10, x = f"-self.width * 3 - 40", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = createDirectory, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["create_dir"], cx = "right")
+btAddFolder = button.Button(st.win, y = 10, x = f"-self.width * 3 - 40", width = st.uiBS, height = st.uiBS, func = createDirectory, fontPath = st.uiFont, image = uiEngineImages["create_dir"], cx = "right", **st.UI_Settings["Button"])
 
 # button for file to project assets conductor
-btDeleteFile = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = deleteFileInPAC, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["trash"], cx = "right")
+btDeleteFile = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, func = deleteFileInPAC, fontPath = st.uiFont, image = uiEngineImages["trash"], cx = "right", **st.UI_Settings["Button"])
 
 # button for rename file in project assets conductor
-btRenameFile = button.Button(st.win, y = 10, x = f"-self.width * 3 - 40", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startRenameFilePAC, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["rename"], cx = "right")
+btRenameFile = button.Button(st.win, y = 10, x = f"-self.width * 3 - 40", width = st.uiBS, height = st.uiBS, func = startRenameFilePAC, fontPath = st.uiFont, image = uiEngineImages["rename"], cx = "right", **st.UI_Settings["Button"])
 
 # button for move file/folder to other directory in project assets conductor
-btMoveFile = button.Button(st.win, y = 10, x = f"-self.width * 4 - 50", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startCRfromMoveFile, fontPath = st.uiFont, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["moveFile"], cx = "right")
+btMoveFile = button.Button(st.win, y = 10, x = f"-self.width * 4 - 50", width = st.uiBS, height = st.uiBS, func = startCRfromMoveFile, fontPath = st.uiFont, image = uiEngineImages["moveFile"], cx = "right", **st.UI_Settings["Button"])
 
-btDoneCR = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = moveFileInPAC, fontPath = st.uiFont, image = uiEngineImages["checkmark"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right")
+btDoneCR = button.Button(st.win, y = 10, x = f"-self.width * 2 - 30", width = st.uiBS, height = st.uiBS, func = moveFileInPAC, fontPath = st.uiFont, image = uiEngineImages["checkmark"],cx = "right", **st.UI_Settings["Button"])
 
 # button for create new project
-btCreateProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, text = "+", borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = createProject, x = -10, y = -10, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["plus"], cx = "right", cy = "bottom")
+btCreateProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = createProject, x = -10, y = -10, image = uiEngineImages["plus"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
-btLoadProjects = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = startCRfromImportProject, x = -10, y = f"-self.height * 1 - 20", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["load_projects"], cx = "right", cy = "bottom")
+btLoadProjects = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = startCRfromImportProject, x = -10, y = f"-self.height * 1 - 20", image = uiEngineImages["load_projects"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for delete project
-btDeleteProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, text = "del", borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = deleteFolderInPM, x = -10, y = f"-self.height * 2 - 30", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["trash"], cx = "right", cy = "bottom")
+btDeleteProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = deleteFolderInPM, x = -10, y = f"-self.height * 2 - 30", image = uiEngineImages["trash"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for copy project
-btCopyProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, text = "del", borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = copyProject, x = -10, y = f"-self.height * 3 - 40", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["copy"], cx = "right", cy = "bottom")
+btCopyProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = copyProject, x = -10, y = f"-self.height * 3 - 40", image = uiEngineImages["copy"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
 # button for rename project
-btRenameProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, text = "rename", borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = startRenameProject, x = -10, y = f"-self.height * 4 - 50", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["rename"], cx = "right", cy = "bottom")
+btRenameProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = startRenameProject, x = -10, y = f"-self.height * 4 - 50", image = uiEngineImages["rename"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
-btOpenExportProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = OpenMenuToExportProject, x = -10, y = f"-self.height * 5 - 60", color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["export"], cx = "right", cy = "bottom")
+btOpenExportProject = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = OpenMenuToExportProject, x = -10, y = f"-self.height * 5 - 60", image = uiEngineImages["export"], cx = "right", cy = "bottom", **st.UI_Settings["Button"])
 
-btCloseExportProject = button.Button(st.win, y = 10, x = -10, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = CloseMenuToExportProject, fontPath = st.uiFont, image = uiEngineImages["cancel"], color = st.uiBC, pressedColor = st.uiBPC, cx = "right")
+btCloseExportProject = button.Button(st.win, y = 10, x = -10, width = st.uiBS, height = st.uiBS, func = CloseMenuToExportProject, fontPath = st.uiFont, image = uiEngineImages["cancel"], cx = "right", **st.UI_Settings["Button"])
 
-btSetExportPath = button.Button(st.win, width = st.uiBS, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = startCRfromExportProject, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["load"], x = 10)
+btSetExportPath = button.Button(st.win, width = st.uiBS, height = st.uiBS, fontPath = st.uiFont, func = startCRfromExportProject, image = uiEngineImages["load"], x = 10, **st.UI_Settings["Button"])
 
-btExportProject = button.Button(st.win, width = st.uiBS * 2, height = st.uiBS, borderRadius = st.uiWBBR, fontSize = st.uiBFS, fontPath = st.uiFont, func = ExportProject, x = 0, y = -10, color = st.uiBC, pressedColor = st.uiBPC, image = uiEngineImages["checkmark"], cx = "center", cy = "bottom")
+btExportProject = button.Button(st.win, width = st.uiBS * 2, height = st.uiBS, fontPath = st.uiFont, func = ExportProject, x = 0, y = -10, image = uiEngineImages["checkmark"], cx = "center", cy = "bottom", **st.UI_Settings["Button"])
 
 # inputs for object inspector
-ObjName = input.Input(st.win, changeObjProperty, noText = "Name...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "name", content = "(self.key)", textColor = st.uiITC, x = 10)
+ObjName = input.Input(st.win, changeObjProperty, noText = "Name...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "name", content = "(self.key)", x = 10, **st.UI_Settings["Input"])
 
-ObjX = input.Input(st.win, changeObjProperty, noText = "PosX...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "x", content = "(self.key)", textColor = st.uiITC)
+ObjX = input.Input(st.win, changeObjProperty, noText = "PosX...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "x", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjY = input.Input(st.win, changeObjProperty, noText = "PosY...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "y", content = "(self.key)", textColor = st.uiITC)
+ObjY = input.Input(st.win, changeObjProperty, noText = "PosY...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "y", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjWidth = input.Input(st.win, changeObjProperty, noText = "Width...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "width", content = "(self.key)", textColor = st.uiITC)
+ObjWidth = input.Input(st.win, changeObjProperty, noText = "Width...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "width", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjHeight = input.Input(st.win, changeObjProperty, noText = "Height...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "height", content = "(self.key)", textColor = st.uiITC)
+ObjHeight = input.Input(st.win, changeObjProperty, noText = "Height...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "height", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjAngle = input.Input(st.win, changeObjProperty, noText = "Angle...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "angle", content = "(self.key)", textColor = st.uiITC)
+ObjAngle = input.Input(st.win, changeObjProperty, noText = "Angle...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "angle", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjCX = input.Input(st.win, changeObjProperty, noText = "pos...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "cx", content = "(self.key)", textColor = st.uiITC)
+ObjCX = input.Input(st.win, changeObjProperty, noText = "pos...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "cx", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjCY = input.Input(st.win, changeObjProperty, noText = "pos...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "cy", content = "(self.key)", textColor = st.uiITC)
+ObjCY = input.Input(st.win, changeObjProperty, noText = "pos...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "cy", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjText = input.Input(st.win, changeObjProperty, noText = "text...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "text", content = "(self.key)", textColor = st.uiITC)
+ObjText = input.Input(st.win, changeObjProperty, noText = "text...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "text", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjFontSize = input.Input(st.win, changeObjProperty, noText = "fontSize...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "fontSize", content = "(self.key)", textColor = st.uiITC)
+ObjFontSize = input.Input(st.win, changeObjProperty, noText = "fontSize...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "fontSize", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjColor = input.Input(st.win, changeObjProperty, noText = "color...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "color", content = "(self.key)", textColor = st.uiITC)
+ObjColor = input.Input(st.win, changeObjProperty, noText = "color...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "color", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjTSP = input.Input(st.win, changeObjProperty, noText = "transparent...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "transparent", content = "(self.key)", textColor = st.uiITC)
+ObjTSP = input.Input(st.win, changeObjProperty, noText = "transparent...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "transparent", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjScript = input.Input(st.win, changeObjProperty, noText = "script...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "script", content = "(self.key)", textColor = st.uiITC)
+ObjScript = input.Input(st.win, changeObjProperty, noText = "script...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "script", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjLayer = input.Input(st.win, changeObjProperty, noText = "layer...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "layer", content = "(self.key)", textColor = st.uiITC)
+ObjLayer = input.Input(st.win, changeObjProperty, noText = "layer...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "layer", content = "(self.key)", **st.UI_Settings["Input"])
 
-ObjTag = input.Input(st.win, changeObjProperty, noText = "tag...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, key = "tag", content = "(self.key)", textColor = st.uiITC)
+ObjTag = input.Input(st.win, changeObjProperty, noText = "tag...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, key = "tag", content = "(self.key)", **st.UI_Settings["Input"])
 
 # toggles button for object inspector
-ObjRender = toggleButton.ToggleButton(st.win, "render", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjRender = toggleButton.ToggleButton(st.win, "render", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjFlipX = toggleButton.ToggleButton(st.win, "flipX", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjFlipX = toggleButton.ToggleButton(st.win, "flipX", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjFlipY = toggleButton.ToggleButton(st.win, "flipY", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjFlipY = toggleButton.ToggleButton(st.win, "flipY", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjRichText = toggleButton.ToggleButton(st.win, "richText", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjRichText = toggleButton.ToggleButton(st.win, "richText", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjUseFullAlpha = toggleButton.ToggleButton(st.win, "useFullAlpha", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjUseFullAlpha = toggleButton.ToggleButton(st.win, "useFullAlpha", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjUseCamera = toggleButton.ToggleButton(st.win, "useCamera", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjUseCamera = toggleButton.ToggleButton(st.win, "useCamera", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
-ObjSmooth = toggleButton.ToggleButton(st.win, "smooth", changeObjProperty, borderRadius = st.uiWIBR, fillSize = 5, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, color = st.uiBC)
+ObjSmooth = toggleButton.ToggleButton(st.win, "smooth", changeObjProperty, image = uiEngineImages["checkmark"], width = st.uiBS, height = st.uiBS, **st.UI_Settings["ToggleButton"])
 
 # buttons for object inspector
-ObjLoadImage = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "set", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startCR, fontPath = st.uiFont, key = "image", image = uiEngineImages["load"], color = st.uiBC, pressedColor = st.uiBPC)
+ObjLoadImage = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, func = startCR, fontPath = st.uiFont, key = "image", image = uiEngineImages["load"], **st.UI_Settings["Button"])
 
-ObjBD = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "select", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["body"], color = st.uiBC, pressedColor = st.uiBPC, key = "bodyType", content = f"(['None', 'dynamic', 'static', 'kinematic'], self, 'bodyType')")
+ObjBD = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["body"], key = "bodyType", content = f"(['None', 'dynamic', 'static', 'kinematic'], self, 'bodyType')", **st.UI_Settings["Button"])
 
-ObjTC = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "select", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["point"], color = st.uiBC, pressedColor = st.uiBPC, key = "textCentering", content = f"(['left', 'center', 'right'], self, 'textCentering')")
+ObjTC = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, func = startSelectorForObjectInspector, fontPath = st.uiFont, image = uiEngineImages["point"], key = "textCentering", content = f"(['left', 'center', 'right'], self, 'textCentering')", **st.UI_Settings["Button"])
 
-ObjLoadFont = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, text = "set", borderRadius = st.uiWBBR, fontSize = st.uiBFS, func = startCR, fontPath = st.uiFont, key = "font", image = uiEngineImages["load"], color = st.uiBC, pressedColor = st.uiBPC)
+ObjLoadFont = button.Button(st.win, x = st.width - 110, y = 10, width = st.uiBS, height = st.uiBS, func = startCR, fontPath = st.uiFont, key = "font", image = uiEngineImages["load"], **st.UI_Settings["Button"])
 
 # selectors for object inspector
-ObjSW = selector.Selector(st.win, changeObjProperty, fontPath = st.uiFont, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 2, height = st.height // 4 if st.width < st.height else st.height // 2, content = "(self.key, self.elements[self.elem_idx])", elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrolling = False, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL, elemsWDiv = 1.5, elemsHDiv = 5, centering = "left")
+ObjSW = selector.Selector(st.win, changeObjProperty, fontPath = st.uiFont, width = st.width // 2 if st.width < st.height else st.width // 3, height = st.height // 4 if st.width < st.height else st.height // 2, content = "(self.key, self.elements[self.elem_idx])", scrolling = False, **st.UI_Settings["SelectorInObjectInspector"])
 
 # file conductor
-fileConductor = conductor.Conductor(st.win, changeObjProperty, width = st.width, height = st.height, fontSize = 60, y = 20 + st.uiBS, color = st.uiCC, fontPath = st.uiFont, elemColor = st.uiCEC, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], content = "'image'", textColor = st.uiCTC, elemSelectedColor = st.uiCSEC, scrollSpeed = st.scrollSpeed)
+fileConductor = conductor.Conductor(st.win, changeObjProperty, width = st.width, height = st.height, y = 20 + st.uiBS, font_path = st.uiFont, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], content = "'image'", **st.UI_Settings["Conductor"])
 
 # projects assets conductor
-PAC = conductor.Conductor(st.win, None, width = st.width, height = st.height, fontSize = 60, y = 20 + st.uiBS, color = st.uiCC, fontPath = st.uiFont, elemColor = st.uiCEC, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], onlyView = True, textColor = st.uiCTC, elemSelectedColor = st.uiCSEC, codeFontPath = f"assets{pt.s}Menlo-Regular.ttf", CbgColor = st.uiCCBGC, scrollSpeed = st.scrollSpeed)
+PAC = conductor.Conductor(st.win, None, width = st.width, height = st.height, y = 20 + st.uiBS, font_path = st.uiFont, images = [uiEngineImages["directory"], uiEngineImages["file"], uiEngineImages["music"], uiEngineImages["font"]], onlyView = True, code_font_path = f"assets{pt.s}Menlo-Regular.ttf", **st.UI_Settings["Conductor"])
 
 # input for rename file in project assets conductor
-IFFIPAC = input.Input(st.win, endRenameFilePAC, noText = "Name...", maxChars = 256, width = PAC.elemWidth, height = PAC.elemHeight, fontSize = 40, fontPath = st.uiFont, color = PAC.elemColor, pressedColor = st.uiIPC, x = 10, ATL = False, textColor = st.uiITC)
+IFFIPAC = input.Input(st.win, endRenameFilePAC, noText = "Name...", width = PAC.elem_width, height = PAC.elem_height, fontPath = st.uiFont, x = PAC.x + 10, ATL = False, **st.UI_Settings["Input"])
 
-InputSetExportProjectVersion = input.Input(st.win, renameExportProjectVersion, noText = "version...", maxChars = 256, borderRadius = st.uiWIBR, width = st.uiIW, height = st.uiIH, fontSize = 40, fontPath = st.uiFont, color = st.uiIC, pressedColor = st.uiIPC, textColor = st.uiITC, x = 10)
+InputSetExportProjectVersion = input.Input(st.win, renameExportProjectVersion, noText = "version...", width = st.uiIW, height = st.uiIH, fontPath = st.uiFont, x = 10, **st.UI_Settings["Input"])
 
 # project manager
-PM = selector.Selector(st.win, openProject, elements = st.projects[:], fontPath = st.uiFont, y = 10 + uiEngineImages["ENGINE_ICON"].get_height() + 50, borderRadius = st.uiWPEOEEBR, color = st.uiPMC, elemColor = st.uiPEC, width = st.width // 1.5, x = st.width // 2 - (st.width // 1.5) // 2, elemSelectedColor = st.uiPSEC, textColor = st.uiPMTC, fillSize = st.uiPMFS, scrollSpeed = st.scrollSpeed, content = "(self.elem_idx)", centering = st.uiPMEC, textCentering = st.uiPMTc)
+PM = selector.Selector(st.win, openProject, elements = st.projects[:], fontPath = st.uiFont, y = 10 + uiEngineImages["ENGINE_ICON"].get_height() + 50, width = st.width // 1.5, x = st.width // 2 - (st.width // 1.5) // 2, content = "(self.elem_idx)", elem_height_div = 10 if st.width < st.height else 8, **st.UI_Settings["ProjectManager"])
 
 # input for rename project in project manager
-IFRPIPM = input.Input(st.win, endRenameProject, noText = "Name...", maxChars = 256, width = PM.elem_width, height = PM.elem_height, fontSize = 40, fontPath = st.uiFont, color = PM.elem_color, pressedColor = st.uiIPC, x = PM.x, ATL = False, borderRadius = st.uiWPEOEEBR, textColor = st.uiITC)
+IFRPIPM = input.Input(st.win, endRenameProject, noText = "Name...", width = PM.elem_width, height = PM.elem_height, fontPath = st.uiFont, x = PM.x, ATL = False, **st.UI_Settings["Input"])
 
 # selection object hierarchy
-SOHM = selector.Selector(st.win, setObjProperty, fontPath = st.uiFont, y = 10, x = 10, borderRadius = st.uiWPEOEEBR, color = st.uiSOHC, elemColor = st.uiSOHEC, width = st.width // 1.3, height = st.height - 20, content = "(self.elements[self.elem_idx])", elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL, elemsWDiv = 1.5, elemsHDiv = 15 if st.width < st.height else 10, centering = st.uiSOHEc, textCentering = st.uiSOHTC)
+SOHM = selector.Selector(st.win, setObjProperty, fontPath = st.uiFont, y = 10, x = 10, width = st.width // 1.3, height = st.height - 20, content = "(self.elements[self.elem_idx])", elem_height_div = 15 if st.width < st.height else 10, **st.UI_Settings["ObjectHierarchy"])
 
 # selection new object panel
-SNOP = selector.Selector(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - st.height // 2 - 10, x = btShowPanel.rect.right - st.width // 1.5, borderRadius = btShowPanel.border_radius, color = btShowPanel.color, elemColor = btShowPanel.pressed_color, width = st.width // 1.5 if st.width < st.height else st.width // 3, height = st.height // 2, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], elemSelectedColor = st.uiSOHSEC, fillSize = st.uiSOHFL, scrollSpeed = st.scrollSpeed, bgBorderRadius = st.uiSOHBGBR, bgFillSize = st.uiSOHBGFL, elemsWDiv = 1.5, elemsHDiv = 5, centering = st.uiNOPEC, textCentering = st.uiNOPTC)
+w = st.width // 1.5 if st.width < st.height else st.width // 3
+h = st.height // 2
+SNOP = selector.Selector(st.win, createObject, fontPath = st.uiFont, y = btShowPanel.rect.y - h - 10, x = btShowPanel.rect.right - w, width = w, height = h, content = "(self.elements[self.elem_idx])", elements = ["Object", "Text"], **st.UI_Settings["NewObjectPanel"])
 
 # engine console
-_console = console.Console(st.win, height = st.AppHeight // 2, width = st.AppWidth, font = st.uiFont, y = st.AppHeight - st.AppHeight // 2, bgColor = st.uiCBC, logImg = uiEngineImages["message"], errorImg = uiEngineImages["error"], warningImg = uiEngineImages["warning"], scrollSpeed = st.scrollSpeed)
+_console = console.Console(st.win, height = st.AppHeight // 2, width = st.AppWidth, font = st.uiFont, y = st.AppHeight - st.AppHeight // 2, logImg = uiEngineImages["message"], errorImg = uiEngineImages["error"], warningImg = uiEngineImages["warning"], **st.UI_Settings["Console"])
 
 # progress bar for load project
 h = st.height // 4 if st.height > st.width else st.height // 2
 w = st.width // 1.2 if st.height > st.width else st.width // 2.4
-PB = progressBar.ProgressBar(st.win, height = h, width = w, font = st.uiFont, y = st.height // 2 - h // 2, x = st.width // 2 - w // 2, bgColor = st.uiPBBGC, title = "Loading assets...", textColor = st.uiPBTC, progressBarColor = st.uiPBC, progressBarBgColor = st.uiPBBC, borderRadius = st.uiPBBR)
+PB = progressBar.ProgressBar(st.win, height = h, width = w, font = st.uiFont, y = st.height // 2 - h // 2, x = st.width // 2 - w // 2, title = "Loading assets...", **st.UI_Settings["ProgressBar"])
 
 uiEPME = [btSetExportPath, InputSetExportProjectVersion]
 
@@ -1321,10 +1360,10 @@ def drawUI():
         if st.lastSelectionObjectClass == "Object":
             if OIII != None:
                 st.win.blit(OIII, (ObjLoadImage.rect.right + 50, ObjLoadImage.rect.top))
-                pygame.draw.rect(st.win, st.uiBC, (ObjLoadImage.rect.right + 50, ObjLoadImage.rect.top, OIIIW, OIIIH), 3)
+                pygame.draw.rect(st.win, st.uiSCIOI, (ObjLoadImage.rect.right + 50, ObjLoadImage.rect.top, OIIIW, OIIIH), 3)
         elif st.lastSelectionObjectClass == "Text":
             st.win.blit(OFNII, (ObjLoadFont.rect.right + 50, ObjLoadFont.rect.centery - OFNIIH // 2))
-            pygame.draw.rect(st.win, st.uiBC, (ObjLoadFont.rect.right + 50 - 5, ObjLoadFont.rect.centery - OFNIIH // 2 - 5, OFNIIW + 10, OFNIIH + 10), 3)
+            pygame.draw.rect(st.win, st.uiSCIOI, (ObjLoadFont.rect.right + 50 - 5, ObjLoadFont.rect.centery - OFNIIH // 2 - 5, OFNIIW + 10, OFNIIH + 10), 3)
         
         btCloseInfo.update()
         
@@ -1336,7 +1375,7 @@ def drawUI():
             st.win.blit(i, (CSTN_POS[idx][0], CSTN_POS[idx][1] + OPII))
         
         if st.isSelector:
-        	ObjSW.update(st.MP, st.MBP)
+            ObjSW.update(st.MP, st.MBP)
         	
     if st.lastSelectionObject == None:
         btStartApp.update()
@@ -1348,13 +1387,13 @@ def drawApp():
     st.winApp.fill(st.GBGC)
         
     for script in st.MHFU:
-    	try:
-    		script.Update()
-    	except Exception as e:
-    	    error = True
-    	    tb = e.__traceback__
-    	    filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
-    	    _console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
+        try:
+            script.Update()
+        except Exception as e:
+            error = True
+            tb = e.__traceback_
+            filename, line_num, _, _ = traceback.extract_tb(tb)[-1]
+            _console.Log(f"UniPy Error: in script \"{filename.split(pt.s)[-1]}\": in line [{line_num}]\n{e}", "error")
 
     pe.Camera.update()
     
@@ -1365,7 +1404,8 @@ def drawApp():
     objLayers = collections.OrderedDict(sorted(objLayers.items()))
     
     for layer in objLayers:
-        for obj in objLayers[layer]: obj.update()
+        for obj in objLayers[layer]:
+            obj.update()
     
     st.win.blit(st.winApp, (0, 0))
     
@@ -1396,10 +1436,10 @@ def drawPAC():
     btCancelCR.update()
     
     if not PAC.viewText and PAC.elem_idx == -1:
-	    btAddFile.update()
-	    btAddFolder.update()
+        btAddFile.update()
+        btAddFolder.update()
 	    
-    if PAC.elem_idx != -1:
+    if PAC.elem_idx != -1 and not st.isRenameFile:
         btDeleteFile.update()
         btRenameFile.update()
         btMoveFile.update()
@@ -1413,7 +1453,7 @@ def drawProjects():
     btCreateProject.update()
     btLoadProjects.update()
     
-    if PM.elem_idx != -1:
+    if PM.elem_idx != -1 and not st.isRenameProject:
         btDeleteProject.update()
         btCopyProject.update()
         btRenameProject.update()

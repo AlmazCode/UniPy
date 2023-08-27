@@ -9,39 +9,34 @@ class Input:
         self.no_text = args.get("noText", "Text")
         self.text = args.get("text", "")
         self.old_text = self.text
-
-        self.text_color = args.get("textColor", (255, 255, 255))
-        self.color = args.get("color", (150, 150, 150))
-        self.pressed_color = args.get("pressedColor", (100, 100, 100)) 
-
-        self.cursor_color = args.get("cursorColor", (0, 150, 255))
-
-        self.start_time = 30
-        self.time = 30
+        self.text_color = args.get("text_color", [255, 255, 255])
+        self.pressed_text_color = args.get("pressed_text_color", [225, 225, 225])
+        self.color = args.get("color", [150, 150, 150])
+        self.pressed_color = args.get("pressed_color", [100, 100, 100])
+        self.stroke_color = args.get("stroke_color", [100, 100, 100])
+        self.pressed_stroke_color = args.get("pressed_stroke_color", [70, 70, 70])
+        self.cursor_color = args.get("cursor_color", [0, 150, 255])
+        self.start_time = args.get("cursor_tick_time", 30)
+        self.time = self.start_time
         self.direction = -1
-
-        self.max_chars = args.get("maxChars", 16)
-
+        self.max_chars = args.get("max_chars", 256)
         self.text_end = 0
-
         self.mode = 0
         self.render = args.get("render", True)
-        self.border_radius = args.get("borderRadius", -1)
-        self.fill_size = args.get("fillSize", 0)
-
+        self.border_radius = args.get("border_radius", -1)
+        self.fill_size = args.get("fill_size", 0)
         self.surface = surface
-
         self.key = args.get("key", "")
         self.func = func
         self.content = args.get("content", "()")
-        
         self.cx = args.get("cx", "!n")
         self.cy = args.get("cy", "!n")
         self.width = args.get("width", 200)
         self.height = args.get("height", 50)
         self.x = args.get("x", 0)
         self.y = args.get("y", 0)
-
+        self.stroke_size = args.get("stroke_size", 0)
+        self.text_offset = args.get("text_offset", 0)
         self.font_path = args.get("fontPath", None)
         self.adjust_dimensions_and_positions()
     
@@ -69,6 +64,10 @@ class Input:
 
         pygame.draw.rect(self.cdw, self.color, (0, 0, self.rect.width, self.rect.height), self.fill_size, self.border_radius)
         pygame.draw.rect(self.cpw, self.pressed_color, (0, 0, self.rect.width, self.rect.height), self.fill_size, self.border_radius)
+        
+        if self.stroke_size > 0:
+            pygame.draw.rect(self.cdw, self.stroke_color, (0, 0, self.rect.width, self.rect.height), self.stroke_size, self.border_radius)
+            pygame.draw.rect(self.cpw, self.pressed_stroke_color, (0, 0, self.rect.width, self.rect.height), self.stroke_size, self.border_radius)
 
     def set_old_text(self):
         self.text = self.old_text
@@ -95,7 +94,7 @@ class Input:
             if self.func is not None:
                 eval(f"self.func{self.content}")
                 return True
-            return False
+        return False
 
     def check_text(self):
         self.text_end = 0
@@ -178,21 +177,18 @@ class Input:
         self.surface.blit(self.cdw if self.mode == 0 else self.cpw, self.rect)
 
         if self.text == '':
-            no_text = self.font.render(self.no_text, 0, self.text_color)
+            no_text = self.font.render(self.no_text, 0, self.text_color if self.mode == 0 else self.pressed_text_color)
             no_text.set_alpha(128)
-            text_win = no_text.get_rect(center=((self.rect.x + no_text.get_width() // 2) + 5, self.rect.centery))
 
-            self.surface.blit(no_text, text_win)
+            self.surface.blit(no_text, (self.rect.x + 10 + self.text_offset, self.rect.y + no_text.get_height() // 2))
 
         else:
-            text = self.font.render(str(self.text)[self.text_end:], 0, self.text_color)
-            text_win = text.get_rect(center=((self.rect.x + text.get_width() // 2) + 5, self.rect.centery))
+            text = self.font.render(str(self.text)[self.text_end:], 0, self.text_color if self.mode == 0 else self.pressed_text_color)
 
-            self.surface.blit(text, text_win)
-            rect = pygame.Rect(text.get_width(), 0, 0, 0)
+            self.surface.blit(text, (self.rect.x + 10 + self.text_offset, self.rect.centery - text.get_height() // 2))
 
-            if self.mode == 1 and self.direction == -1 and rect.x + 20 < self.rect.width:
-                pygame.draw.rect(self.surface, self.cursor_color, (self.rect.x + text.get_width() + 10, self.rect.centery - self.font_size // 2, self.font_size // 12, self.font_size))
+            if self.mode == 1 and self.direction == -1 and text.get_width() + 20 < self.rect.width:
+                pygame.draw.rect(self.surface, self.cursor_color, (self.rect.x + text.get_width() + 15 + self.text_offset, self.rect.centery - self.font_size // 2, self.font_size // 12, self.font_size))
 
 inputs = []
 INPUTS = []

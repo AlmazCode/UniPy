@@ -38,6 +38,7 @@ defaultComponents = {
             "tc": "left",
             "rt": False,
             "sm": False,
+            "m": 1
             }
 
 def loadObjs(pe, path, IDX = -1):
@@ -56,7 +57,15 @@ def loadObjs(pe, path, IDX = -1):
             get2 = regex.split(i)
             if IDX == -1:
                 pe.objClass.append(get2[1].strip())
-                pe.objName.append(get2[0].strip() if get2[0].strip() not in pe.objName else f"{get2[0].strip()} (rename it!)")
+                if get2[0].strip() in pe.objName:
+                    c = 1
+                    newName = f"{get2[0].strip()} ({c})"
+                    while newName in pe.objName:
+                        c += 1
+                        newName = f"{get2[0].strip()} ({c})"
+                    pe.objName.append(newName)
+                else:
+                    pe.objName.append(get2[0].strip())
             cm = defaultComponents.copy()
             for _obj0xfg in get2[2:]:
                 _obj0xfg = _obj0xfg.split(":", 1)
@@ -65,7 +74,7 @@ def loadObjs(pe, path, IDX = -1):
                 cm[_obj0xfg[0]] = val
                 
             if get2[1].strip() == "Object":
-                pe.objects.append(Object(st.winApp, cm["x"], cm["y"], cm["w"], cm["h"], cm["render"], cm["image"], cm["bd"], cm["a"], cm["sw"], cm["sh"], cm["fx"], cm["fy"], cm["sx"], cm["sy"], cm["cx"], cm["cy"], cm["tsp"], cm["ufa"], cm["s"], cm["sc"], cm["scc"], cm["color"], cm["uc"], get2[0].strip(), cm["l"], cm["t"]))
+                pe.objects.append(Object(st.winApp, cm["x"], cm["y"], cm["w"], cm["h"], cm["render"], cm["image"], cm["bd"], cm["a"], cm["sw"], cm["sh"], cm["fx"], cm["fy"], cm["sx"], cm["sy"], cm["cx"], cm["cy"], cm["tsp"], cm["ufa"], cm["s"], cm["sc"], cm["scc"], cm["color"], cm["uc"], get2[0].strip(), cm["l"], cm["t"], cm["m"]))
             elif get2[1].strip() == "Text":
                 pe.objects.append(Text(st.winApp, cm["x"], cm["y"], cm["text"], cm["fs"], cm["font"], cm["color"], cm["tsp"], cm["a"], cm["render"], cm["fx"], cm["fy"], cm["cx"], cm["cy"], cm["sx"], cm["sy"], cm["sfs"], cm["tc"], cm["rt"], cm["s"], cm["sc"], cm["scc"], cm["uc"], get2[0].strip(), cm["l"], cm["t"], cm["sm"]))
         
@@ -97,7 +106,8 @@ scc: {pe.objects[idx].SC_CHANGED},
 color: {pe.objects[idx].color},
 uc: {pe.objects[idx].useCamera},
 t: '{pe.objects[idx].tag}',
-l: {pe.objects[idx].layer}"""
+l: {pe.objects[idx].layer},
+m: {pe.objects[idx].mass}"""
 
     elif _type == "Text":
         return f"""{pe.objName[idx]},
@@ -152,7 +162,7 @@ def addObj(pe, path, newClass):
     pe.objClass.append(newClass)
     
     if newClass == "Object":
-        pe.objects.append(Object(st.winApp, 0, 0, 0, 0, True, "None", "None", 0, 0, 0, False, False, 0, 0, "None", "None", 255, False, "None", {}, {}, (255, 255, 255), True, name, 0, "obj"))
+        pe.objects.append(Object(st.winApp, 0, 0, 0, 0, True, "None", "None", 0, 0, 0, False, False, 0, 0, "None", "None", 255, False, "None", {}, {}, (255, 255, 255), True, name, 0, "obj", 1))
     elif newClass == "Text":
         pe.objects.append(Text(st.winApp, 0, 0, "text", 32, "None", (0, 0, 0), 255, 0, True, False, False, "None", "None", 0, 0, 32, "left", False, "None", {}, {}, True, name, 0, "obj", False))
     else: return 0

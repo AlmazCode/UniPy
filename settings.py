@@ -1,10 +1,11 @@
 import pygame, re, os
 import pather as pt
+import json
 
 pygame.init()
 
 # enigine settings
-version = "alpha 0.1.5"
+version = "alpha 0.1.6"
 # engine development started on 02/19/2023
 
 # create engine display
@@ -15,7 +16,7 @@ pygame.display.set_caption(f"UniPy {version}")
 # start display settings
 width, height = win.get_size()
 AppWidth = width
-AppHeight = height - 80
+AppHeight = height - (80 if pt._platform == "Android" else 40)
 fps = 60
 WR = pygame.Rect(0, 0, AppWidth, AppHeight)
 
@@ -26,6 +27,7 @@ winApp = pygame.Surface((AppWidth, AppHeight))
 lastSelectionObject = None
 lastPressedInput = None
 scrollSpeed = 1
+mouseScrollSpeed = 15
 lastSelectionObjectClass = None
 isRenameFile = False
 isRenameProject = False
@@ -35,10 +37,9 @@ isConsole = False
 lastSelectorContent = None
 exportProjectPath = pt._defaultPath
 MP, MBP = None, None
-
-LPBFS = None # last pressed button for selector
-
+LPBFS = None
 drawingLayer = -1
+scollPos = None
 
 # for project system
 modules = []
@@ -48,72 +49,54 @@ projectIdx = -1
 projectSize = (0, 0)
 MHFU = []
 
+UI_Settings = {}
+settingsPath = f".{pt.s}Settings{pt.s}"
+if os.path.exists(settingsPath):
+    for setting in os.listdir(settingsPath):
+        if setting.split(".")[-1] == "json":
+            with open(f"{settingsPath}{setting}", "r") as f:
+                inf = json.load(f)
+                UI_Settings.update(inf)
+
 # game settings
 GBGSC = (255, 255, 255) # game bg start color
 GBGC = GBGSC # game bg color
 
-# UI settings for the engine's graphical user interface
-
 # Colors for various UI elements
-uiTColor = (255, 255, 255)  # Text color for the engine UI
-uiBgColor = (60, 60, 60)  # Background color for the engine UI
-uiBC = (130, 130, 130)  # UI buttons color
-uiBPC = (100, 100, 100)  # UI buttons pressed color
-uiIC = (150, 150, 150)  # UI inputs color
-uiIPC = (100, 100, 100)  # UI inputs pressed color
-uiSOHTC = (255, 255, 255)  # UI selection object hierarchy text color
-uiPSEC = (30, 144, 255)  # UI project selected element color
-uiSOHSEC = (30, 144, 255)  # UI selection object hierarchy selected element color
-uiCC = (50, 50, 50)  # UI conductor color
-uiCSEC = (30, 144, 255)  # UI conductor selected element color
-uiSOHC = (50, 50, 50)  # UI selection object hierarchy color
-uiPMC = (60, 60, 60)  # UI project manager color
-uiSOHEC = (100, 100, 100)  # UI selection object hierarchy element color
-uiPEC = (100, 100, 100)  # UI project manager element color
-uiCEC = (100, 100, 100)  # UI conductor element color
-uiEIC = (255, 255, 255)  # UI engine images color
-uiCBC = (60, 60, 60)  # UI console background color
-uiCTC = (255, 255, 255)  # UI conductor text color
-uiPMTC = (255, 255, 255)  # UI project manager text color
-uiITC = (255, 255, 255)  # UI inputs text color
-uiPBBGC = (120, 120, 120)  # UI progress bar background color
-uiPBTC = (255, 255, 255)  # UI progress bar text color
-uiPBC = (0, 255, 0)  # UI progress bar color
-uiPBBC = (140, 140, 140)  # UI progress bar background color
-uiMBGC = (80, 80, 80)  # UI messages background color
-uiMTC = (255, 255, 255)  # UI messages text color
-uiCCBGC = (40, 44, 52)  # UI conductor code background color
+mainSettings = UI_Settings.get("Main")
+if mainSettings is not None:
+    uiTColor = mainSettings.get("text_color", [255, 255, 255])
+    uiBgColor = mainSettings.get("bg_color", [60, 60, 60])
+    uiSCIOI = mainSettings.get("stroke_color_in_object_inspector", [130, 130, 130])
+    uiEIC = mainSettings.get("engine_images_color", [255, 255, 255])
+    uiISIOI = mainSettings.get("image_size_in_object_inspector", 196)
+    uiFont = mainSettings.get("font", "calibri.ttf")
+else:
+    uiTColor = [255, 255, 255]
+    uiBgColor = [60, 60, 60]
+    uiSCIOI = [130, 130, 130]
+    uiEIC = [255, 255, 255]
+    uiISIOI = 196
+    uiFont = f"calibri.ttf"
 
-uiPMEC = "center" # UI project manager elements centering: left, center, right
-uiPMTc = "left" # UI project manager text centering: left, center, right
-uiSOHEc = "left" # UI selection object hierarchy elements centering: left, center, right
-uiSOHTC = "left" # UI selection object hierarchy text centering: left, center, right
-uiNOPEC = "left" # UI new object panel elements centering: left, center, right
-uiNOPTC = "left" # UI new object panel text centering: left, center, right
+uiFont = f"assets{pt.s}{uiFont}"
 
-# UI element dimensions
-uiPRW = width // 1.5  # UI project rect width
-uiPRH = height // 10  # UI project rect height
-uiBS = width // 8 if height > width else width // 18  # UI buttons size, dynamically adjusted for screen size
-if pt._platform != "Android":
-    uiBS = uiBS // 1.3  # If not on Android, further reduce the button size
-uiBFS = 1  # UI button font size
-uiIW = width // 2 if height > width else width // 4  # UI input width
-uiIH = uiIW // 4  # UI input height, dynamically adjusted for screen orientation
-uiWBBR = 15  # Widgets buttons border radius
-uiWIBR = 15  # Widgets inputs, toggle buttons border radius
-uiWPEOEEBR = 15  # Widgets project elements, object hierarchy elements border radius
-uiPBBR = 15  # Progress bar border radius
-uiMBR = 15  # Messages border radius
-uiSOHBGBR = 15 # UI selection object hierarchy bg border radius
-uiMFS = 0  # Messages fill size
-uiPMFS = 0  # Project manager fill size
-uiSOHFL = 0  # UI selection object hierarchy fill size
-uiSOHBGFL = 0 # UI selection object hierarchy bg fill size
-uiISIOI = 196  # Image size in the object inspector
-uiFont = f"assets{pt.s}calibri.ttf" # Engine UI font path
-uiTFont = pygame.font.Font(uiFont, height // 20  if height > width else height // 10) # Engine UI font size (big)
-uiTSFont = pygame.font.Font(uiFont, height // 32 if height > width else height // 18) # Engine UI font size (small)
+if pt._platform == "Android":
+    uiTFontSize = height // 20  if height > width else height // 10
+    uiTSFontSize = height // 32 if height > width else height // 18
+    uiIW = width // 2 if height > width else width // 4
+    uiIH = uiIW // 4
+    uiBS = width // 8 if height > width else width // 18
+else:
+    uiTFontSize = height // 32  if height > width else height // 18
+    uiTSFontSize = height // 50 if height > width else height // 25
+    uiIW = width // 2 if height > width else width // 4
+    uiIH = uiIW // 6
+    uiISIOI /= 2
+    uiBS = width // 10 if height > width else width // 20
+
+uiTFont = pygame.font.Font(uiFont, uiTFontSize)
+uiTSFont = pygame.font.Font(uiFont, uiTSFontSize)
 
 # engine images that won't change their color
 uiII = ["error", "message", "warning", "ENGINE_ICON", "engineIcon"]
